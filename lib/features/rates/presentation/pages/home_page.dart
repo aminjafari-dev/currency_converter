@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
 import 'package:currency_converter/core/router/page_name.dart';
-import 'package:currency_converter/core/router/route_args.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
@@ -21,6 +20,9 @@ import 'package:currency_converter/features/rates/presentation/bloc/home_state.d
 import 'package:currency_converter/features/rates/presentation/widgets/currency_row.dart';
 
 /// Home – Currency List screen matching Stitch `01_home_currency_list`.
+///
+/// Tap any currency to edit its amount; siblings update via local conversion.
+/// Swipe a row to remove it. Long-press sets the persisted base for refresh.
 ///
 /// Example:
 /// ```dart
@@ -52,13 +54,7 @@ class _HomeView extends StatelessWidget {
           style: AppTextStyles.headlineMd(weight: FontWeight.w800),
         ),
         actions: [
-          IconButton(
-            tooltip: l10n.editList,
-            onPressed: () {
-              context.read<HomeBloc>().add(const HomeEvent.editModeToggled());
-            },
-            icon: const Icon(Icons.edit_outlined, color: AppColors.onSurfaceVariant),
-          ),
+          // Add currency — the only app-bar action (edit pen removed).
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.containerMargin),
             child: Material(
@@ -141,17 +137,15 @@ class _HomeView extends StatelessWidget {
                 return Center(child: GText(l10n.emptyCurrencies));
               }
 
-              final baseCode = selected
-                  .firstWhere((c) => c.isBase, orElse: () => selected.first)
-                  .code;
-
               return RefreshIndicator(
                 color: AppColors.primaryFixed,
                 backgroundColor: AppColors.surfaceContainer,
                 onRefresh: () async {
                   context.read<HomeBloc>().add(const HomeEvent.refreshed());
                   await context.read<HomeBloc>().stream.firstWhere(
-                        (s) => s.load is HomeLoadCompleted || s.load is HomeLoadError,
+                        (s) =>
+                            s.load is HomeLoadCompleted ||
+                            s.load is HomeLoadError,
                       );
                 },
                 child: ListView.separated(
@@ -217,46 +211,57 @@ class _HomeView extends StatelessWidget {
                     final amount = convertedAmounts[item.code] ?? 0;
                     final isBase = item.isBase;
 
-                    return CurrencyRow(
-                      code: item.code,
-                      name: name,
-                      amountText: CurrencyFormatter.format(amount, item.code),
-                      isBase: isBase,
-                      isEditMode: state.isEditMode,
-                      onTap: () {
-                        if (state.isEditMode) return;
-                        if (isBase) return;
-                        Navigator.of(context).pushNamed(
-                          PageName.currencyDetail,
-                          arguments: CurrencyDetailArgs(
-                            code: item.code,
-                            baseCode: baseCode,
-                          ),
-                        );
+                    // Swipe to remove replaces the old pen + edit-mode affordance.
+                    return Dismissible(
+                      key: ValueKey('currency-${item.code}'),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.errorContainer,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusXl),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.onErrorContainer,
+                        ),
+                      ),
+                      onDismissed: (_) {
+                        context.read<HomeBloc>().add(
+                              HomeEvent.currencyRemoved(code: item.code),
+                            );
                       },
-                      onLongPress: () {
-                        context
-                            .read<HomeBloc>()
-                            .add(HomeEvent.baseChanged(code: item.code));
-                      },
-                      onRemove: () {
-                        context
-                            .read<HomeBloc>()
-                            .add(HomeEvent.currencyRemoved(code: item.code));
-                      },
-                      onAmountChanged: isBase
-                          ? (value) {
-                              final parsed = double.tryParse(
-                                value.replaceAll(',', ''),
+                      child: CurrencyRow(
+                        code: item.code,
+                        name: name,
+                        amountText:
+                            CurrencyFormatter.format(amount, item.code),
+                        isBase: isBase,
+                        onLongPress: () {
+                          context.read<HomeBloc>().add(
+                                HomeEvent.baseChanged(code: item.code),
                               );
-                              if (parsed != null) {
-                                context.read<HomeBloc>().add(
-                                      HomeEvent.amountChanged(amount: parsed),
-                                    );
-                              }
-                            }
-                          : null,
-                      amountValue: isBase ? baseAmount : null,
+                        },
+                        onAmountChanged: (value) {
+                          final parsed = double.tryParse(
+                            value.replaceAll(',', ''),
+                          );
+                          // Ignore incomplete input (e.g. empty / lone ".") so
+                          // we do not reset sibling amounts mid-keystroke.
+                          if (parsed != null) {
+                            context.read<HomeBloc>().add(
+                                  HomeEvent.amountChanged(
+                                    code: item.code,
+                                    amount: parsed,
+                                  ),
+                                );
+                          }
+                        },
+                      ),
                     );
                   },
                 ),

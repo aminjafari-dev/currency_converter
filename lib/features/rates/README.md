@@ -22,7 +22,7 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 - **Presentation**
   - `bloc/home_*.dart` — freezed events/states + `HomeBloc`
   - `pages/home_page.dart` — Stitch Home list UI
-  - `widgets/currency_row.dart` — editable base row + converted rows
+  - `widgets/currency_row.dart` — in-place editable amount on every row
 
 ## Use Cases
 
@@ -43,8 +43,11 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 1. User opens Home → `HomeEvent.started`
 2. BLoC loads selected currencies + catalog + latest rates
 3. Amounts are converted locally from the snapshot
-4. Pull-to-refresh calls `RefreshRates` and updates the timestamp footer
-5. Long-press a row to change the base; tap navigates to Detail
+4. User taps any currency row → keyboard opens; typing dispatches `amountChanged(code, amount)`
+5. BLoC realigns every other currency via `ConvertAmount` on the cached snapshot (no network)
+6. Pull-to-refresh calls `RefreshRates` and updates the timestamp footer
+7. Long-press a row to change the persisted base (local recalculation only)
+8. Swipe a row end-to-start to remove it from the list
 
 ## Key Components
 

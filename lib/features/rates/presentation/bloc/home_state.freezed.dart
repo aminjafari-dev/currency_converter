@@ -515,7 +515,6 @@ class _$HomeLoadErrorCopyWithImpl<$Res>
 /// @nodoc
 mixin _$HomeState {
   HomeLoadState get load;
-  bool get isEditMode;
 
   /// Create a copy of HomeState
   /// with the given fields replaced by the non-null parameter values.
@@ -529,17 +528,15 @@ mixin _$HomeState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is HomeState &&
-            (identical(other.load, load) || other.load == load) &&
-            (identical(other.isEditMode, isEditMode) ||
-                other.isEditMode == isEditMode));
+            (identical(other.load, load) || other.load == load));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, load, isEditMode);
+  int get hashCode => Object.hash(runtimeType, load);
 
   @override
   String toString() {
-    return 'HomeState(load: $load, isEditMode: $isEditMode)';
+    return 'HomeState(load: $load)';
   }
 }
 
@@ -548,7 +545,7 @@ abstract mixin class $HomeStateCopyWith<$Res> {
   factory $HomeStateCopyWith(HomeState value, $Res Function(HomeState) _then) =
       _$HomeStateCopyWithImpl;
   @useResult
-  $Res call({HomeLoadState load, bool isEditMode});
+  $Res call({HomeLoadState load});
 
   $HomeLoadStateCopyWith<$Res> get load;
 }
@@ -566,17 +563,12 @@ class _$HomeStateCopyWithImpl<$Res> implements $HomeStateCopyWith<$Res> {
   @override
   $Res call({
     Object? load = null,
-    Object? isEditMode = null,
   }) {
     return _then(_self.copyWith(
       load: null == load
           ? _self.load
           : load // ignore: cast_nullable_to_non_nullable
               as HomeLoadState,
-      isEditMode: null == isEditMode
-          ? _self.isEditMode
-          : isEditMode // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 
@@ -682,13 +674,13 @@ extension HomeStatePatterns on HomeState {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(HomeLoadState load, bool isEditMode)? $default, {
+    TResult Function(HomeLoadState load)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _HomeState() when $default != null:
-        return $default(_that.load, _that.isEditMode);
+        return $default(_that.load);
       case _:
         return orElse();
     }
@@ -709,12 +701,12 @@ extension HomeStatePatterns on HomeState {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(HomeLoadState load, bool isEditMode) $default,
+    TResult Function(HomeLoadState load) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _HomeState():
-        return $default(_that.load, _that.isEditMode);
+        return $default(_that.load);
     }
   }
 
@@ -732,12 +724,12 @@ extension HomeStatePatterns on HomeState {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(HomeLoadState load, bool isEditMode)? $default,
+    TResult? Function(HomeLoadState load)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _HomeState() when $default != null:
-        return $default(_that.load, _that.isEditMode);
+        return $default(_that.load);
       case _:
         return null;
     }
@@ -747,13 +739,10 @@ extension HomeStatePatterns on HomeState {
 /// @nodoc
 
 class _HomeState implements HomeState {
-  const _HomeState({required this.load, this.isEditMode = false});
+  const _HomeState({required this.load});
 
   @override
   final HomeLoadState load;
-  @override
-  @JsonKey()
-  final bool isEditMode;
 
   /// Create a copy of HomeState
   /// with the given fields replaced by the non-null parameter values.
@@ -768,17 +757,15 @@ class _HomeState implements HomeState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _HomeState &&
-            (identical(other.load, load) || other.load == load) &&
-            (identical(other.isEditMode, isEditMode) ||
-                other.isEditMode == isEditMode));
+            (identical(other.load, load) || other.load == load));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, load, isEditMode);
+  int get hashCode => Object.hash(runtimeType, load);
 
   @override
   String toString() {
-    return 'HomeState(load: $load, isEditMode: $isEditMode)';
+    return 'HomeState(load: $load)';
   }
 }
 
@@ -790,7 +777,7 @@ abstract mixin class _$HomeStateCopyWith<$Res>
       __$HomeStateCopyWithImpl;
   @override
   @useResult
-  $Res call({HomeLoadState load, bool isEditMode});
+  $Res call({HomeLoadState load});
 
   @override
   $HomeLoadStateCopyWith<$Res> get load;
@@ -809,17 +796,12 @@ class __$HomeStateCopyWithImpl<$Res> implements _$HomeStateCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? load = null,
-    Object? isEditMode = null,
   }) {
     return _then(_HomeState(
       load: null == load
           ? _self.load
           : load // ignore: cast_nullable_to_non_nullable
               as HomeLoadState,
-      isEditMode: null == isEditMode
-          ? _self.isEditMode
-          : isEditMode // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 

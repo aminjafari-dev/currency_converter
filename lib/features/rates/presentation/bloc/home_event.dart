@@ -7,7 +7,9 @@ part 'home_event.freezed.dart';
 /// Example:
 /// ```dart
 /// context.read<HomeBloc>().add(const HomeEvent.started());
-/// context.read<HomeBloc>().add(HomeEvent.amountChanged(amount: 100));
+/// context.read<HomeBloc>().add(
+///   HomeEvent.amountChanged(code: 'EUR', amount: 100),
+/// );
 /// ```
 @freezed
 sealed class HomeEvent with _$HomeEvent {
@@ -17,17 +19,20 @@ sealed class HomeEvent with _$HomeEvent {
   /// Pull-to-refresh / tap sync icon.
   const factory HomeEvent.refreshed() = HomeRefreshed;
 
-  /// User edited the base amount field.
-  const factory HomeEvent.amountChanged({required double amount}) =
-      HomeAmountChanged;
+  /// User edited any currency's amount — recalculate all others locally.
+  ///
+  /// [code] is the currency the user typed into; [amount] is that value.
+  /// No network call: uses [ConvertAmount] against the cached snapshot.
+  const factory HomeEvent.amountChanged({
+    required String code,
+    required double amount,
+  }) = HomeAmountChanged;
 
-  /// User tapped a non-base row to make it the new base.
+  /// User long-pressed a row to make it the persisted base (for refresh).
+  /// Amounts realign locally from the visible value on that row — no rate fetch.
   const factory HomeEvent.baseChanged({required String code}) = HomeBaseChanged;
 
-  /// User removed a currency while in edit mode.
+  /// User dismissed a currency from the list (e.g. swipe-to-remove).
   const factory HomeEvent.currencyRemoved({required String code}) =
       HomeCurrencyRemoved;
-
-  /// Toggle edit mode (reorder / remove affordances).
-  const factory HomeEvent.editModeToggled() = HomeEditModeToggled;
 }

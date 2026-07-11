@@ -16,7 +16,10 @@ import 'package:currency_converter/features/rates/presentation/bloc/home_state.d
 /// BLoC for the Home currency list screen.
 ///
 /// Loads selected currencies + latest rates, converts amounts locally, and
-/// handles base/amount/edit interactions without any UI types.
+/// handles base/amount interactions without any UI types.
+///
+/// Editing any row's amount realigns every other currency via [ConvertAmount]
+/// against the cached snapshot — never a new network request.
 ///
 /// Example:
 /// ```dart
@@ -47,10 +50,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       await event.when(
         started: () => _onStarted(emit),
         refreshed: () => _onRefreshed(emit),
-        amountChanged: (amount) => _onAmountChanged(amount, emit),
+        amountChanged: (code, amount) => _onAmountChanged(code, amount, emit),
         baseChanged: (code) => _onBaseChanged(code, emit),
         currencyRemoved: (code) => _onCurrencyRemoved(code, emit),
-        editModeToggled: () => _onEditModeToggled(emit),
       );
     });
   }
@@ -130,10 +132,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       return;
     }
 
+    // Prefer keeping the user's current base amount across refresh when we
+    // already have completed state; otherwise start from the default.
     const defaultAmount = 100.0;
+    final prior = state.load;
+    final seedAmount = prior is HomeLoadCompleted
+        ? (prior.convertedAmounts[baseCode] ?? prior.baseAmount)
+        : defaultAmount;
+
     final converted = await _convertAll(
-      baseAmount: defaultAmount,
-      baseCode: baseCode,
+      amount: seedAmount,
+      fromCode: baseCode,
       selected: selected!,
       snapshot: snapshot!,
     );
@@ -145,17 +154,34 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           selected: selected!,
           catalog: catalog,
           convertedAmounts: converted,
-          baseAmount: defaultAmount,
+          baseAmount: seedAmount,
           lastUpdated: snapshot!.fetchedAt,
         ),
       ));
     }
   }
 
-  Future<void> _onAmountChanged(double amount, Emitter<HomeState> emit) async {
+  /// Recalculates every selected currency from the edited row using cached rates.
+  ///
+  /// Useful when the user types into EUR while USD is the persisted base —
+  /// others update immediately with no network round-trip.
+  Future<void> _onAmountChanged(
+    String code,
+    double amount,
+    Emitter<HomeState> emit,
+  ) async {
     final current = state.load;
     if (current is! HomeLoadCompleted) return;
 
+    final converted = await _convertAll(
+      amount: amount,
+      fromCode: code,
+      selected: current.selected,
+      snapshot: current.snapshot,
+    );
+
+    // Persist the amount that belongs to the official base so refresh/load
+    // can restore a consistent seed value later.
     final baseCode = current.selected
         .firstWhere(
           (c) => c.isBase,
@@ -163,30 +189,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         )
         .code;
 
-    final converted = await _convertAll(
-      baseAmount: amount,
-      baseCode: baseCode,
-      selected: current.selected,
-      snapshot: current.snapshot,
-    );
-
     if (!emit.isDone) {
       emit(state.copyWith(
         load: current.copyWith(
-          baseAmount: amount,
+          baseAmount: converted[baseCode] ?? amount,
           convertedAmounts: converted,
         ),
       ));
     }
   }
 
+  /// Changes the persisted base currency and realigns amounts locally.
+  ///
+  /// Does not fetch new rates — triangular conversion on the existing snapshot
+  /// is enough until the user pull-to-refreshes.
   Future<void> _onBaseChanged(String code, Emitter<HomeState> emit) async {
     final current = state.load;
     if (current is! HomeLoadCompleted) return;
 
-    final previousBase = current.selected
-        .firstWhere((c) => c.isBase, orElse: () => current.selected.first)
-        .code;
     // Preserve the amount the user sees on the newly selected row.
     final newBaseAmount = current.convertedAmounts[code] ?? current.baseAmount;
 
@@ -203,32 +223,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       return;
     }
 
-    // Refresh rates against the new base for accurate quotes.
-    final ratesResult =
-        await getLatestRates(GetLatestRatesParams(base: code));
-    RateSnapshot? snapshot;
-    ratesResult.fold((_) => snapshot = current.snapshot, (s) => snapshot = s);
-
     final converted = await _convertAll(
-      baseAmount: newBaseAmount,
-      baseCode: code,
+      amount: newBaseAmount,
+      fromCode: code,
       selected: selected!,
-      snapshot: snapshot!,
+      snapshot: current.snapshot,
     );
 
     if (!emit.isDone) {
       emit(state.copyWith(
         load: current.copyWith(
           selected: selected!,
-          snapshot: snapshot!,
           baseAmount: newBaseAmount,
           convertedAmounts: converted,
-          lastUpdated: snapshot!.fetchedAt,
         ),
       ));
     }
-    // previousBase kept for potential future analytics; silence unused warning.
-    assert(previousBase.isNotEmpty);
   }
 
   Future<void> _onCurrencyRemoved(String code, Emitter<HomeState> emit) async {
@@ -248,13 +258,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       return;
     }
 
+    // After removal, recompute from the persisted base so remaining rows stay aligned.
     final baseCode = selected!
         .firstWhere((c) => c.isBase, orElse: () => selected!.first)
         .code;
+    final seedAmount =
+        current.convertedAmounts[baseCode] ?? current.baseAmount;
 
     final converted = await _convertAll(
-      baseAmount: current.baseAmount,
-      baseCode: baseCode,
+      amount: seedAmount,
+      fromCode: baseCode,
       selected: selected!,
       snapshot: current.snapshot,
     );
@@ -263,34 +276,32 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(state.copyWith(
         load: current.copyWith(
           selected: selected!,
+          baseAmount: seedAmount,
           convertedAmounts: converted,
         ),
       ));
     }
   }
 
-  Future<void> _onEditModeToggled(Emitter<HomeState> emit) async {
-    if (!emit.isDone) {
-      emit(state.copyWith(isEditMode: !state.isEditMode));
-    }
-  }
-
+  /// Converts [amount] in [fromCode] into every selected currency via [ConvertAmount].
+  ///
+  /// Example: editing 50 EUR updates USD/GBP using the cached snapshot rates.
   Future<Map<String, double>> _convertAll({
-    required double baseAmount,
-    required String baseCode,
+    required double amount,
+    required String fromCode,
     required List<SelectedCurrency> selected,
     required RateSnapshot snapshot,
   }) async {
     final map = <String, double>{};
     for (final item in selected) {
-      if (item.code == baseCode) {
-        map[item.code] = baseAmount;
+      if (item.code == fromCode) {
+        map[item.code] = amount;
         continue;
       }
       final result = await convertAmount(
         ConvertAmountParams(
-          amount: baseAmount,
-          fromCode: baseCode,
+          amount: amount,
+          fromCode: fromCode,
           toCode: item.code,
           base: snapshot.base,
           rates: snapshot.rates,

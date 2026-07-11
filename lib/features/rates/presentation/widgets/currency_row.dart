@@ -10,24 +10,26 @@ import 'package:currency_converter/core/widgets/g_text.dart';
 
 /// Single currency row used on the Home list.
 ///
-/// Base row shows an editable amount with lime border; other rows show
-/// converted amounts and navigate to Detail on tap.
+/// Every row shows an editable amount. Tapping the row focuses the field so
+/// the keyboard opens immediately; other currencies realign via local conversion.
 ///
 /// Example:
 /// ```dart
-/// CurrencyRow(code: 'EUR', name: 'Euro', amountText: '1,142.30', isBase: false);
+/// CurrencyRow(
+///   code: 'EUR',
+///   name: 'Euro',
+///   amountText: '1,142.30',
+///   isBase: false,
+///   onAmountChanged: (value) {},
+/// );
 /// ```
 class CurrencyRow extends StatefulWidget {
   final String code;
   final String name;
   final String amountText;
   final bool isBase;
-  final bool isEditMode;
-  final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final VoidCallback? onRemove;
   final ValueChanged<String>? onAmountChanged;
-  final double? amountValue;
 
   const CurrencyRow({
     super.key,
@@ -35,12 +37,8 @@ class CurrencyRow extends StatefulWidget {
     required this.name,
     required this.amountText,
     required this.isBase,
-    this.isEditMode = false,
-    this.onTap,
     this.onLongPress,
-    this.onRemove,
     this.onAmountChanged,
-    this.amountValue,
   });
 
   @override
@@ -49,18 +47,33 @@ class CurrencyRow extends StatefulWidget {
 
 class _CurrencyRowState extends State<CurrencyRow> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  /// Tracks focus so we can highlight the active row and avoid overwriting
+  /// the user's in-progress keystrokes when other amounts update.
+  bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.amountText);
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    // Rebuild borders when focus changes; useful so the active input stands out.
+    if (_hasFocus != _focusNode.hasFocus) {
+      setState(() => _hasFocus = _focusNode.hasFocus);
+    }
   }
 
   @override
   void didUpdateWidget(covariant CurrencyRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Sync controller when the formatted amount changes externally (base swap).
-    if (widget.isBase &&
+    // Sync controller from BLoC only when this field is not being typed into —
+    // otherwise rebuilding after converting siblings would fight the keyboard.
+    if (!_focusNode.hasFocus &&
         widget.amountText != oldWidget.amountText &&
         _controller.text != widget.amountText) {
       _controller.text = widget.amountText;
@@ -69,39 +82,44 @@ class _CurrencyRowState extends State<CurrencyRow> {
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChanged);
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Highlight the focused (active) row; fall back to base styling when idle.
+    final isHighlighted = _hasFocus || widget.isBase;
+
     return Material(
-      color: widget.isBase
+      color: isHighlighted
           ? AppColors.surfaceContainer
           : AppColors.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         side: BorderSide(
-          color: widget.isBase
+          color: isHighlighted
               ? AppColors.primaryFixed
               : AppColors.surfaceContainerHighest,
         ),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        onTap: widget.onTap,
+        onTap: () {
+          // Tap anywhere on the row opens the amount keyboard immediately.
+          _focusNode.requestFocus();
+          _controller.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: _controller.text.length,
+          );
+        },
         onLongPress: widget.onLongPress,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
-              if (widget.isEditMode) ...[
-                IconButton(
-                  onPressed: widget.onRemove,
-                  icon: const Icon(Icons.remove_circle, color: AppColors.error),
-                ),
-                GGap.hXs,
-              ],
               CurrencyFlag(code: widget.code, size: 48),
               GGap.hMd,
               Expanded(
@@ -121,35 +139,32 @@ class _CurrencyRowState extends State<CurrencyRow> {
                   ],
                 ),
               ),
-              if (widget.isBase && widget.onAmountChanged != null)
-                SizedBox(
-                  width: 160,
-                  child: TextField(
-                    controller: _controller,
-                    textAlign: TextAlign.right,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                    ],
-                    style: AppTextStyles.numeralXl(color: AppColors.primaryFixed),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      filled: false,
-                    ),
-                    onChanged: widget.onAmountChanged,
+              SizedBox(
+                width: 160,
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  textAlign: TextAlign.right,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                )
-              else
-                GText(
-                  widget.amountText,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                  ],
                   style: AppTextStyles.numeralXl(
-                    color: AppColors.onSurfaceVariant,
+                    color: isHighlighted
+                        ? AppColors.primaryFixed
+                        : AppColors.onSurfaceVariant,
                   ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    filled: false,
+                  ),
+                  onChanged: widget.onAmountChanged,
                 ),
+              ),
             ],
           ),
         ),

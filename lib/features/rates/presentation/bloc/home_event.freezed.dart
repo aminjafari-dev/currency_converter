@@ -55,7 +55,6 @@ extension HomeEventPatterns on HomeEvent {
     TResult Function(HomeAmountChanged value)? amountChanged,
     TResult Function(HomeBaseChanged value)? baseChanged,
     TResult Function(HomeCurrencyRemoved value)? currencyRemoved,
-    TResult Function(HomeEditModeToggled value)? editModeToggled,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -70,8 +69,6 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that);
-      case HomeEditModeToggled() when editModeToggled != null:
-        return editModeToggled(_that);
       case _:
         return orElse();
     }
@@ -97,7 +94,6 @@ extension HomeEventPatterns on HomeEvent {
     required TResult Function(HomeAmountChanged value) amountChanged,
     required TResult Function(HomeBaseChanged value) baseChanged,
     required TResult Function(HomeCurrencyRemoved value) currencyRemoved,
-    required TResult Function(HomeEditModeToggled value) editModeToggled,
   }) {
     final _that = this;
     switch (_that) {
@@ -111,8 +107,6 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that);
       case HomeCurrencyRemoved():
         return currencyRemoved(_that);
-      case HomeEditModeToggled():
-        return editModeToggled(_that);
     }
   }
 
@@ -135,7 +129,6 @@ extension HomeEventPatterns on HomeEvent {
     TResult? Function(HomeAmountChanged value)? amountChanged,
     TResult? Function(HomeBaseChanged value)? baseChanged,
     TResult? Function(HomeCurrencyRemoved value)? currencyRemoved,
-    TResult? Function(HomeEditModeToggled value)? editModeToggled,
   }) {
     final _that = this;
     switch (_that) {
@@ -149,8 +142,6 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that);
-      case HomeEditModeToggled() when editModeToggled != null:
-        return editModeToggled(_that);
       case _:
         return null;
     }
@@ -172,10 +163,9 @@ extension HomeEventPatterns on HomeEvent {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? started,
     TResult Function()? refreshed,
-    TResult Function(double amount)? amountChanged,
+    TResult Function(String code, double amount)? amountChanged,
     TResult Function(String code)? baseChanged,
     TResult Function(String code)? currencyRemoved,
-    TResult Function()? editModeToggled,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -185,13 +175,11 @@ extension HomeEventPatterns on HomeEvent {
       case HomeRefreshed() when refreshed != null:
         return refreshed();
       case HomeAmountChanged() when amountChanged != null:
-        return amountChanged(_that.amount);
+        return amountChanged(_that.code, _that.amount);
       case HomeBaseChanged() when baseChanged != null:
         return baseChanged(_that.code);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that.code);
-      case HomeEditModeToggled() when editModeToggled != null:
-        return editModeToggled();
       case _:
         return orElse();
     }
@@ -214,10 +202,9 @@ extension HomeEventPatterns on HomeEvent {
   TResult when<TResult extends Object?>({
     required TResult Function() started,
     required TResult Function() refreshed,
-    required TResult Function(double amount) amountChanged,
+    required TResult Function(String code, double amount) amountChanged,
     required TResult Function(String code) baseChanged,
     required TResult Function(String code) currencyRemoved,
-    required TResult Function() editModeToggled,
   }) {
     final _that = this;
     switch (_that) {
@@ -226,13 +213,11 @@ extension HomeEventPatterns on HomeEvent {
       case HomeRefreshed():
         return refreshed();
       case HomeAmountChanged():
-        return amountChanged(_that.amount);
+        return amountChanged(_that.code, _that.amount);
       case HomeBaseChanged():
         return baseChanged(_that.code);
       case HomeCurrencyRemoved():
         return currencyRemoved(_that.code);
-      case HomeEditModeToggled():
-        return editModeToggled();
     }
   }
 
@@ -252,10 +237,9 @@ extension HomeEventPatterns on HomeEvent {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? started,
     TResult? Function()? refreshed,
-    TResult? Function(double amount)? amountChanged,
+    TResult? Function(String code, double amount)? amountChanged,
     TResult? Function(String code)? baseChanged,
     TResult? Function(String code)? currencyRemoved,
-    TResult? Function()? editModeToggled,
   }) {
     final _that = this;
     switch (_that) {
@@ -264,13 +248,11 @@ extension HomeEventPatterns on HomeEvent {
       case HomeRefreshed() when refreshed != null:
         return refreshed();
       case HomeAmountChanged() when amountChanged != null:
-        return amountChanged(_that.amount);
+        return amountChanged(_that.code, _that.amount);
       case HomeBaseChanged() when baseChanged != null:
         return baseChanged(_that.code);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that.code);
-      case HomeEditModeToggled() when editModeToggled != null:
-        return editModeToggled();
       case _:
         return null;
     }
@@ -320,8 +302,9 @@ class HomeRefreshed implements HomeEvent {
 /// @nodoc
 
 class HomeAmountChanged implements HomeEvent {
-  const HomeAmountChanged({required this.amount});
+  const HomeAmountChanged({required this.code, required this.amount});
 
+  final String code;
   final double amount;
 
   /// Create a copy of HomeEvent
@@ -336,15 +319,16 @@ class HomeAmountChanged implements HomeEvent {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is HomeAmountChanged &&
+            (identical(other.code, code) || other.code == code) &&
             (identical(other.amount, amount) || other.amount == amount));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, amount);
+  int get hashCode => Object.hash(runtimeType, code, amount);
 
   @override
   String toString() {
-    return 'HomeEvent.amountChanged(amount: $amount)';
+    return 'HomeEvent.amountChanged(code: $code, amount: $amount)';
   }
 }
 
@@ -355,7 +339,7 @@ abstract mixin class $HomeAmountChangedCopyWith<$Res>
           HomeAmountChanged value, $Res Function(HomeAmountChanged) _then) =
       _$HomeAmountChangedCopyWithImpl;
   @useResult
-  $Res call({double amount});
+  $Res call({String code, double amount});
 }
 
 /// @nodoc
@@ -370,9 +354,14 @@ class _$HomeAmountChangedCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? code = null,
     Object? amount = null,
   }) {
     return _then(HomeAmountChanged(
+      code: null == code
+          ? _self.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as String,
       amount: null == amount
           ? _self.amount
           : amount // ignore: cast_nullable_to_non_nullable
@@ -506,26 +495,6 @@ class _$HomeCurrencyRemovedCopyWithImpl<$Res>
           : code // ignore: cast_nullable_to_non_nullable
               as String,
     ));
-  }
-}
-
-/// @nodoc
-
-class HomeEditModeToggled implements HomeEvent {
-  const HomeEditModeToggled();
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is HomeEditModeToggled);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'HomeEvent.editModeToggled()';
   }
 }
 

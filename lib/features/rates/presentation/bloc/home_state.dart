@@ -23,10 +23,11 @@ sealed class HomeLoadState with _$HomeLoadState {
 }
 
 /// Combined Home screen state.
+///
+/// Amounts are always editable in-place; there is no separate list-edit mode.
 @freezed
 sealed class HomeState with _$HomeState {
   const factory HomeState({
     required HomeLoadState load,
-    @Default(false) bool isEditMode,
   }) = _HomeState;
 }
