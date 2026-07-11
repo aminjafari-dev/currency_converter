@@ -1,0 +1,151 @@
+---
+description: flutter_bloc + freezed event/state patterns using Dartz Either
+globs: lib/**/presentation/bloc/**/*.dart
+alwaysApply: false
+---
+### State Management Implementation
+- Use `Bloc` for complex event-driven logic that manages one or more operations
+- Use `freezed` to define immutable sealed classes for events (`entity_event.dart`) and states (`entity_state.dart`)
+- Define all events in one sealed class (e.g. `EntityEvent`) with a factory per operation
+- Define per-operation state classes (`OperationAState`, …) with `initial`, `loading`, `completed`, and `error`, plus a main `EntityState` that combines them
+- Implement BLoC logic in `entity_bloc.dart`; update only the relevant operation via `copyWith`
+- Inject use cases into the BLoC constructor; use cases return `Either<Failure, T>` (never `DataSuccess` / `DataFailed`)
+- Always `await` async work in event handlers
+- Add `if (!emit.isDone)` before every `emit` after an await to avoid emitting after the handler/bloc is done
+- Keep BLoCs free of UI types (`BuildContext`, widgets, etc.)
+- Provide BLoCs with `BlocProvider`; resolve them from GetIt via `registerFactory`
+- Use a `BlocObserver` for logging/debugging
+- Document public classes and non-obvious conditions with short usage comments
+- BLoC/state must use **domain entities**, not data models
+
+### BLoC + Dartz Either
+- Never use `async`/`await` inside `fold()` callbacks
+- Extract success/failure synchronously from `fold`, then run further async work outside
+
+```dart
+final result = await someUseCase(param);
+if (!emit.isDone) {
+  result.fold(
+    (failure) => emit(state.copyWith(
+      operationA: OperationAState.error(_mapFailureToMessage(failure)),
+    )),
+    (data) => emit(state.copyWith(
+      operationA: OperationAState.completed(data),
+    )),
+  );
+}
+```
+
+### Example: entity_event.dart
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'entity_event.freezed.dart';
+
+/// Sealed events for entity-related operations.
+/// Example: context.read<EntityBloc>().add(EntityEvent.operationA(param: id));
+@freezed
+class EntityEvent with _$EntityEvent {
+  const factory EntityEvent.operationA({required String param}) = OperationA;
+  const factory EntityEvent.operationB({required String param}) = OperationB;
+}
+```
+
+### Example: entity_state.dart
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:project/features/feature_a/domain/entities/entity.dart';
+
+part 'entity_state.freezed.dart';
+
+@freezed
+class OperationAState with _$OperationAState {
+  const factory OperationAState.initial() = OperationAInitial;
+  const factory OperationAState.loading() = OperationALoading;
+  const factory OperationAState.completed(Entity data) = OperationACompleted;
+  const factory OperationAState.error(String message) = OperationAError;
+}
+
+@freezed
+class OperationBState with _$OperationBState {
+  const factory OperationBState.initial() = OperationBInitial;
+  const factory OperationBState.loading() = OperationBLoading;
+  const factory OperationBState.completed(String result) = OperationBCompleted;
+  const factory OperationBState.error(String message) = OperationBError;
+}
+
+@freezed
+class EntityState with _$EntityState {
+  const factory EntityState({
+    required OperationAState operationA,
+    required OperationBState operationB,
+  }) = _EntityState;
+}
+```
+
+### Example: entity_bloc.dart
+```dart
+import 'package:bloc/bloc.dart';
+import 'package:project/core/error/failures.dart';
+import 'package:project/features/feature_a/domain/usecases/operation_a_usecase.dart';
+import 'package:project/features/feature_a/domain/usecases/operation_b_usecase.dart';
+import 'package:project/features/feature_a/presentation/bloc/entity_event.dart';
+import 'package:project/features/feature_a/presentation/bloc/entity_state.dart';
+
+/// Manages entity operations via injected use cases returning Either.
+class EntityBloc extends Bloc<EntityEvent, EntityState> {
+  final OperationAUseCase operationAUseCase;
+  final OperationBUseCase operationBUseCase;
+
+  EntityBloc({
+    required this.operationAUseCase,
+    required this.operationBUseCase,
+  }) : super(const EntityState(
+          operationA: OperationAState.initial(),
+          operationB: OperationBState.initial(),
+        )) {
+    on<EntityEvent>((event, emit) async {
+      await event.when(
+        operationA: (param) => _onOperationA(param, emit),
+        operationB: (param) => _onOperationB(param, emit),
+      );
+    });
+  }
+
+  Future<void> _onOperationA(String param, Emitter<EntityState> emit) async {
+    if (!emit.isDone) {
+      emit(state.copyWith(operationA: const OperationAState.loading()));
+    }
+    final result = await operationAUseCase(param);
+    if (!emit.isDone) {
+      result.fold(
+        (failure) => emit(state.copyWith(
+          operationA: OperationAState.error(_mapFailureToMessage(failure)),
+        )),
+        (data) => emit(state.copyWith(
+          operationA: OperationAState.completed(data),
+        )),
+      );
+    }
+  }
+
+  Future<void> _onOperationB(String param, Emitter<EntityState> emit) async {
+    if (!emit.isDone) {
+      emit(state.copyWith(operationB: const OperationBState.loading()));
+    }
+    final result = await operationBUseCase(param);
+    if (!emit.isDone) {
+      result.fold(
+        (failure) => emit(state.copyWith(
+          operationB: OperationBState.error(_mapFailureToMessage(failure)),
+        )),
+        (data) => emit(state.copyWith(
+          operationB: OperationBState.completed(data),
+        )),
+      );
+    }
+  }
+
+  String _mapFailureToMessage(Failure failure) => failure.message;
+}
+```

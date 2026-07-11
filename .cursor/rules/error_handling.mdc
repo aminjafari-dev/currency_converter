@@ -1,0 +1,63 @@
+---
+description: Dartz Either and Failure-based error handling across layers
+globs: lib/**/*.{dart}
+alwaysApply: false
+---
+### Dartz Error Handling
+- Use `Either<Failure, T>` for error control without throwing across layers
+- `Left` represents failure; `Right` represents success
+- Create a base `Failure` class and extend it for specific error types
+- Map data-layer exceptions to domain `Failure` types inside repositories
+- Use `fold()` to handle success and failure in one place
+- Never use `async`/`await` inside `fold()` callbacks — extract values first, then run async work outside
+- Prefer this pattern over `DataSuccess` / `DataFailed` (do not use those types)
+
+```dart
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
+
+/// Base failure for domain/presentation error mapping.
+/// Example: return Left(ServerFailure('Unable to fetch rates'));
+abstract class Failure extends Equatable {
+  final String message;
+
+  const Failure(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class ServerFailure extends Failure {
+  const ServerFailure([super.message = 'Server error occurred']);
+}
+
+class CacheFailure extends Failure {
+  const CacheFailure([super.message = 'Cache error occurred']);
+}
+
+class NetworkFailure extends Failure {
+  const NetworkFailure([super.message = 'Network error occurred']);
+}
+
+class ValidationFailure extends Failure {
+  const ValidationFailure([super.message = 'Validation failed']);
+}
+
+/// Helpers for Either<Failure, T> in UI and chaining.
+extension EitherExtensions<L, R> on Either<L, R> {
+  R getRight() => (this as Right<L, R>).value;
+
+  L getLeft() => (this as Left<L, R>).value;
+
+  T when<T>({
+    required T Function(L failure) failure,
+    required T Function(R data) success,
+  }) {
+    return fold(failure, success);
+  }
+
+  Either<L, T> flatMap<T>(Either<L, T> Function(R r) f) {
+    return fold((l) => Left(l), (r) => f(r));
+  }
+}
+```

@@ -1,0 +1,13 @@
+---
+description: Repository pattern responsibilities in the data layer
+globs: lib/**/data/repositories/**/*.dart,lib/**/domain/repositories/**/*.dart
+alwaysApply: false
+---
+### Repository Pattern
+- Repositories are the single source of truth for a feature's data
+- Implement caching when appropriate (remote success → cache; offline → local)
+- Handle connectivity gracefully via `NetworkInfo` (or equivalent)
+- Map data models (DTOs) to domain entities before returning `Right(...)`
+- Catch data-source exceptions and return `Left(Failure)` — do not leak exceptions to domain/presentation
+- Expose clear method signatures on the domain repository interface
+- Handle pagination and fetching details inside the repository or dedicated use cases, not in the UI

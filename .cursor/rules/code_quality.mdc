@@ -1,0 +1,13 @@
+---
+description: Code quality, SOLID, and documentation expectations
+globs: lib/**/*.dart
+alwaysApply: false
+---
+### Code Quality
+- Use lint rules with flutter_lints (or the project's configured linter)
+- Keep functions small and focused (under 30 lines when practical)
+- Apply SOLID principles throughout the codebase
+- Use meaningful naming for classes, methods, and variables
+- Document public APIs and complex logic with short usage comments and examples
+- Implement proper null safety
+- Use value objects for domain-specific types when they clarify intent

@@ -1,0 +1,32 @@
+---
+description: Template for per-feature README.md documentation
+globs: lib/features/**/README.md
+alwaysApply: false
+---
+### README.md File
+Generate a detailed README.md for a feature module so another developer or AI can understand architecture, purpose, and usage without reading every file.
+
+Analyze Dart files under `lib/features/<feature_name>/` and produce a README with this structure:
+
+#### Feature Name
+Top-level heading: `# <FeatureName> Feature`
+
+#### Description
+A concise paragraph on what the feature does, its purpose, and that it uses Clean Architecture.
+
+#### Architecture
+Bulleted file structure by layer: Domain, Data, Presentation.
+Under each layer, nest subdirectories (`entities`, `repositories`, `usecases`, `models`, `datasources`, `bloc`, `pages`, `widgets`) and list Dart files with a one-line role description.
+Also mention the feature DI file at the feature root.
+
+#### Use Cases
+For each class in `domain/usecases/`:
+1. **Use Case:** class name
+2. **Description:** one sentence
+3. **Data Flow:** e.g. `Page -> Bloc -> UseCase -> Repository -> DataSource`
+
+#### Data Flow
+Numbered step-by-step narrative of the main user journey (UI → BLoC → UseCase → Repository → DataSource → back).
+
+#### Key Components
+Bulleted list of main packages/patterns (e.g. BLoC, Dartz Either, shared_preferences, Clean Architecture).

@@ -1,0 +1,15 @@
+---
+description: Clean Architecture layers and dependency rule for Flutter features
+alwaysApply: true
+---
+### Clean Architecture
+- Strictly adhere to the Clean Architecture layers: Presentation, Domain, and Data
+- Follow the dependency rule: dependencies always point inward (Presentation → Domain ← Data)
+- Domain layer contains entities, repository interfaces, and use cases
+- Data layer implements repositories and contains data sources and models (DTOs)
+- Presentation layer contains UI components and blocs (no view models)
+- Entities are pure domain objects (no Flutter imports, no business workflows)
+- Use cases hold business rules; repositories orchestrate data sources
+- Use proper abstractions with interfaces/abstract classes for each component
+- Every feature should follow this layered architecture pattern
+- Presentation and BLoC must depend on domain entities, never on data models

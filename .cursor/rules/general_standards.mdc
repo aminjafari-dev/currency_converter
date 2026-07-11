@@ -1,0 +1,28 @@
+---
+description: Shared coding standards pointer — detailed rules live in dedicated files
+alwaysApply: true
+---
+## Coding Standards
+
+Follow these dedicated rule files (do not duplicate conflicting patterns here):
+
+| Concern | Rule file |
+|---------|-----------|
+| Layers & dependency rule | `clean_architecture.mdc` |
+| Feature folders | `feature_organization.mdc` |
+| BLoC + freezed + Either | `state_management.mdc` |
+| Failures / Dartz | `error_handling.mdc` |
+| Use cases & repositories | `use_case_pattern.mdc` / `repository_pattern.mdc` |
+| GetIt registration | `dependency_injection.mdc` |
+| Named routes | `routing.mdc` |
+| l10n / ARB | `localization.mdc` |
+| GScaffold, GText, theme | `ui_guidelines.mdc` |
+| Tests / performance / quality | `testing.mdc`, `performance.mdc`, `code_quality.mdc` |
+| Feature README | `readme_structure.mdc` |
+
+### Hard requirements (always)
+- Prefer Dartz `Either<Failure, T>` for use-case and repository results — never `DataSuccess` / `DataFailed`
+- Register BLoCs with `registerFactory` only (never `registerSingleton` for BLoCs)
+- Use domain entities in presentation; map DTOs → entities in the data layer
+- No hardcoded UI strings; use `AppLocalizations`
+- No raw `Scaffold` / ad-hoc colors; use `GScaffold`, `GText`, `GButton`, and `app_theme`

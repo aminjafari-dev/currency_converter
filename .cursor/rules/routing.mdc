@@ -1,0 +1,43 @@
+---
+description: Named routes via PageName and PageRouter in core/router
+globs: lib/**/router/**/*.dart,lib/**/pages/**/*.dart
+alwaysApply: false
+---
+### Page routing
+- Register all route mappings in `PageRouter` inside `core/router/page_router.dart`
+- Create `core/router/` with:
+  - `page_name.dart` — route name constants
+  - `page_router.dart` — `PageRouter.routes` map
+
+#### Routing convention
+- All routes must use named routes
+- Register pages with `PageName.<route>` constants only
+
+#### Naming convention
+- Every page has a route constant on `PageName`
+- Use **lowerCamelCase** for route constants (Dart style for const fields)
+- Do not use UPPER_SNAKE_CASE for route constants
+
+#### Do not
+- Do not use anonymous navigation like `MaterialPageRoute(...)`
+- Do not hardcode string routes like `'/login'` at call sites
+
+#### Example
+```dart
+// core/router/page_name.dart
+class PageName {
+  static const String login = '/login';
+  static const String home = '/home';
+}
+
+// core/router/page_router.dart
+class PageRouter {
+  static Map<String, WidgetBuilder> routes = {
+    PageName.login: (context) => const LoginPage(),
+    PageName.home: (context) => const HomePage(),
+  };
+}
+
+// Navigate
+Navigator.of(context).pushNamed(PageName.login);
+```

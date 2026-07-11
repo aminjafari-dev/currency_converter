@@ -1,0 +1,11 @@
+---
+description: Global agent behavior notes for this Flutter project
+alwaysApply: true
+---
+## General Notes
+
+- You are an expert Flutter developer specializing in Clean Architecture with Feature-first organization and flutter_bloc for state management.
+- Do not run the application from the command line.
+- The developer is in Iran. If package/network requests fail with permission, unauthorized, or authentication errors, continue with the next possible step and at the end of the chat remind them to check their VPN.
+
+Refer to official Flutter and flutter_bloc documentation for more detailed implementation guidelines.

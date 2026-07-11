@@ -1,0 +1,13 @@
+---
+description: Testing strategy for domain, data, BLoC, and widgets
+globs: test/**/*.dart
+alwaysApply: false
+---
+### Testing Strategy
+- Write unit tests for domain logic, repositories, and Blocs
+- Implement integration tests for features
+- Create widget tests for UI components
+- Use mocks for dependencies with mockito or mocktail
+- Follow Given-When-Then pattern for test structure
+- Aim for high test coverage of domain and data layers
+- When testing Either-based code, assert on `Left`/`Right` (or `fold`) rather than thrown exceptions

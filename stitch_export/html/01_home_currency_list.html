@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kinetic — Currency Exchange</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#636468",
+                    "on-surface": "#e4e2e4",
+                    "primary-fixed": "#c6f24e",
+                    "surface-dim": "#131315",
+                    "on-secondary-container": "#b6b4b7",
+                    "background": "#131315",
+                    "primary-container": "#c6f24e",
+                    "tertiary-container": "#e3e2e6",
+                    "tertiary-fixed": "#e3e2e6",
+                    "on-background": "#e4e2e4",
+                    "surface-container": "#1f1f21",
+                    "on-primary-fixed-variant": "#3a4d00",
+                    "on-tertiary": "#2f3034",
+                    "surface": "#131315",
+                    "outline": "#8e937c",
+                    "on-primary": "#273500",
+                    "surface-container-high": "#2a2a2c",
+                    "secondary-container": "#474649",
+                    "on-surface-variant": "#c4c9b0",
+                    "secondary": "#c8c6c8",
+                    "secondary-fixed": "#e4e2e4",
+                    "surface-container-low": "#1b1b1d",
+                    "secondary-fixed-dim": "#c8c6c8",
+                    "surface-container-highest": "#353437",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed": "#1b1b1d",
+                    "primary": "#ffffff",
+                    "error": "#ffb4ab",
+                    "inverse-surface": "#e4e2e4",
+                    "on-primary-container": "#536d00",
+                    "on-secondary": "#303032",
+                    "tertiary": "#ffffff",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#46474a",
+                    "surface-variant": "#353437",
+                    "inverse-on-surface": "#303032",
+                    "tertiary-fixed-dim": "#c6c6ca",
+                    "surface-container-lowest": "#0e0e10",
+                    "outline-variant": "#444936",
+                    "surface-bright": "#39393b",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed": "#1a1c1f",
+                    "inverse-primary": "#4f6700",
+                    "surface-tint": "#abd533",
+                    "primary-fixed-dim": "#abd533",
+                    "on-secondary-fixed-variant": "#474649",
+                    "on-primary-fixed": "#151f00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "container-margin": "20px",
+                    "md": "16px",
+                    "base": "4px",
+                    "gutter": "12px",
+                    "xl": "32px",
+                    "sm": "12px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "numeral-xl": ["JetBrains Mono"],
+                    "numeral-md": ["JetBrains Mono"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "numeral-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.04em", "fontWeight": "500"}],
+                    "numeral-md": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #131315;
+            color: #e4e2e4;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for minimalist feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131315;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353437;
+            border-radius: 10px;
+        }
+        /* Active currency focus glow */
+        .active-row {
+            box-shadow: 0 0 0 1px #c6f24e;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md antialiased overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-background fixed top-0 w-full z-50 flex justify-between items-center px-container-margin h-16 border-b border-surface-container-highest">
+<div class="flex items-center gap-xs">
+<span class="text-headline-md font-headline-md font-extrabold text-on-surface tracking-tighter">KINETIC</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed hover:opacity-90 transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="pt-20 pb-24 px-container-margin max-w-2xl mx-auto">
+<!-- Currency List -->
+<div class="flex flex-col gap-gutter">
+<!-- USD Row (Active/Focused) -->
+<div class="active-row bg-surface-container p-md rounded-xl flex items-center justify-between transition-all">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-surface-container-highest bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="A clean, high-contrast digital illustration of the United States flag rendered in a circular minimalist style. The colors are vibrant and crisp, set against a dark charcoal background that aligns with a high-end fintech app aesthetic. The lighting is flat and modern, focusing on clear iconography and professional design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0c48qfFQPHp-K1lpcTTTNQQsXkwrzULEg1QG0I4_nli5QYDdaKv6hvEyVDy8ei1w8ksAcOui-ifd8NwfoGG-4-ZecsLIoALuFKRXN4SfQNjZkSBY_bqF48wQajQ6mgfLz7R8el6AN5c8RQEQ2NHyFLBVavO3BSLqBcwsWaxB4hI91dBlZuhTnj6ZjU0R7vde0qmx6NK6Qtv05iozU1k055DTGbHZQCdkZH3Y_ZIlZ4UOSSvPv24IgQ_N3nhzhC8FoQr0sa6qU2Mo"/>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">USD</div>
+<div class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">US Dollar</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<input class="bg-transparent border-none focus:ring-0 text-right font-numeral-xl text-numeral-xl text-primary-fixed p-0 w-full max-w-[180px]" spellcheck="false" type="text" value="1,240.00"/>
+</div>
+</div>
+<!-- EUR Row -->
+<div class="bg-surface-container-low border border-surface-container-highest p-md rounded-xl flex items-center justify-between hover:bg-surface-container transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A clean, high-contrast digital illustration of the European Union flag rendered in a circular minimalist style. Twelve yellow stars are arranged in a perfect circle on a deep blue field, optimized for a dark mode UI. The aesthetic is sharp and professional, fitting for a modern global finance application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCD8UlA2gga0TZRQXnPHjb9yFkANrN-kJVCni4P3k2QxGYzgyPQVSgSKPF0BsP5kYGbfHg_WqGG9DeopdVHShfSo5w8-V8XBKI8_UpspBeV304Y8jDjC4zQEOkO3QwHmb65yNkfR6CMMEMpQwQwenGvjaGwiABbbCWOPjPFfjuLE_b9u_MC3XYTIYmhk0kXDCRn6HkG5BQIWUZkAFcl5l5cd2okO69js_FBIfl6eLpzF76WJhxzvSYpoJMur0--kHTb0PEwzqloOjk"/>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-primary-fixed transition-colors">EUR</div>
+<div class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Euro</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-numeral-xl text-numeral-xl text-on-surface-variant">1,142.30</span>
+</div>
+</div>
+<!-- GBP Row -->
+<div class="bg-surface-container-low border border-surface-container-highest p-md rounded-xl flex items-center justify-between hover:bg-surface-container transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A clean, high-contrast digital illustration of the British Union Jack flag rendered in a circular minimalist style. The iconic red and white crosses are sharp against the blue background, designed with a sleek fintech aesthetic. The lighting is studio-quality, emphasizing clarity and prestige." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm0ilYXL_GI6ergM_Fx3-3HGwh6ANXKnTVWLCw6fGB-iFZVoJtuFoy9BisIf3f3IFp8V1Fb94qR41QwNlyXJGf_VnaohdiGbx0k7NOOPYp1f_GyosB7xgAMH972cQ-5u1U_68o66fZ0qKi-7oXWb3z9Zd-7E2-qbcjeolDLuxSGgylHzkSEYxff3eBv1DP3ucvP4Zk0vl8TW834gsDRkkoIgemFnJiP7D0_mMuWPiN5XXKRjWnti2_7XRWFrOw7y5H-aOrqxNznH0"/>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-primary-fixed transition-colors">GBP</div>
+<div class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">British Pound</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-numeral-xl text-numeral-xl text-on-surface-variant">978.45</span>
+</div>
+</div>
+<!-- JPY Row -->
+<div class="bg-surface-container-low border border-surface-container-highest p-md rounded-xl flex items-center justify-between hover:bg-surface-container transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A clean, high-contrast digital illustration of the Japanese flag rendered in a circular minimalist style. The simple red sun is centered on a crisp white field, with a slight texture that adds depth for a premium UI look. The design is bold and serves as a clear visual anchor in a dark-themed financial app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi0Z1-psz21B0hIMFEJx2wAALJC4dsZeZegBjeyMtv28_mSiGnT6G7Uk8hjfNkA7egQs9_hmC6CkO5V1TdOtcEDQlEFVG3Gr-uDi1RyijvJ7mkakwErpgyf2xPqddprcs-S7XWreZw2xbxfB8h7vaG0nUw_YthTSaf6tAtTn3gwpg5bnyWm8dkkEqkKu4qhSJ8ad2jUULTplgLe-9TQLTlUyiI8NQ5Z6OWet0e86ylLvXaOXIZsh9p9W_KUMOcaYuz-mgp2ocnDV4"/>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-primary-fixed transition-colors">JPY</div>
+<div class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Japanese Yen</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-numeral-xl text-numeral-xl text-on-surface-variant">185,420</span>
+</div>
+</div>
+<!-- CAD Row (Added for variety) -->
+<div class="bg-surface-container-low border border-surface-container-highest p-md rounded-xl flex items-center justify-between hover:bg-surface-container transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A clean, high-contrast digital illustration of the Canadian flag rendered in a circular minimalist style. The red maple leaf is detailed and sharp, flanked by red bars on a white field. The overall style is modern and clean, perfectly suited for an information-dense currency exchange dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV2Y0oJxzATLDnGnAJPIgZUHYuF_6-zQidOgFPCvsMIdxHiIYZlLpLHOfGmmuX3WPgBQnuC8QMOuU7BuDi-LMJZ2tr6G8f-IAa_Jan0WBXQvB2-afzWNB0gY62nlpYCOe12D3rA-tpGZ5neIuKF1M-6S_SgNtHn7m1cfMIu0GffpR3aoTOkVSeEL3eKJofqVRZYsYVWSRxyb5qU2zX92tKiJ6zbYZEIqy-ZoNksUh-pQoO1PyinM5TQheGPFiO50NeOlm8umpgsbY"/>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface group-hover:text-primary-fixed transition-colors">CAD</div>
+<div class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Canadian Dollar</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-numeral-xl text-numeral-xl text-on-surface-variant">1,684.12</span>
+</div>
+</div>
+</div>
+<!-- Update Footer -->
+<div class="mt-xl flex flex-col items-center justify-center gap-base">
+<div class="flex items-center gap-xs text-on-tertiary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">sync</span>
+<span>Rates updated 2 min ago</span>
+</div>
+<div class="w-16 h-1 bg-surface-container-highest rounded-full mt-md"></div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-lg py-xs bg-surface-container-lowest border-t border-surface-container-highest rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-fixed text-on-primary-fixed rounded-full w-12 h-12 scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sync_alt</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary-fixed transition-all" href="#">
+<span class="material-symbols-outlined">show_chart</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary-fixed transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for currency rows
+        document.querySelectorAll('.cursor-pointer').forEach(row => {
+            row.addEventListener('click', function() {
+                // Visual feedback for clicking
+                this.classList.add('scale-[0.98]');
+                setTimeout(() => {
+                    this.classList.remove('scale-[0.98]');
+                }, 100);
+            });
+        });
+
+        // Numeric input formatting logic placeholder
+        const mainInput = document.querySelector('input');
+        if(mainInput) {
+            mainInput.addEventListener('input', (e) => {
+                // Logic to update other rows would go here
+                console.log('Value changed:', e.target.value);
+            });
+        }
+    </script>
+</body></html>

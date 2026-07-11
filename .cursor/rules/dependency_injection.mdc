@@ -1,0 +1,70 @@
+---
+description: GetIt feature-modular dependency injection conventions
+globs: lib/**/*di*.dart,lib/**/locator.dart
+alwaysApply: false
+---
+### Dependency Injection
+
+**Clean Architecture:** each feature has its own DI file at the feature root (e.g. `login_di.dart`). The main `locator.dart` only orchestrates those setup functions.
+
+#### Rules
+- Use precise names (`DashboardBloc`, `login_di.dart`)
+- Register services and repositories with `registerLazySingleton`
+- Register BLoCs with **`registerFactory`** only (new instance per screen; prevents state pollution)
+- Register use cases with `registerLazySingleton` (or `registerFactory` when a fresh instance is required)
+- Register every new UseCase, Bloc, and Repository in the feature DI file
+- Register `LocaleCubit` (or similar app-wide cubits) with `registerLazySingleton`
+- Use `unregister<T>()` for dynamic values (e.g. tokens) that must be replaced
+- Prefer a single GetIt instance named `locator` everywhere (do not mix `locator` and `getIt`)
+
+#### Main locator.dart
+```dart
+import 'package:get_it/get_it.dart';
+import 'package:project/features/login/login_di.dart';
+import 'package:project/features/dashboard/dashboard_di.dart';
+
+final GetIt locator = GetIt.instance;
+
+Future<void> setupLocator() async {
+  await setupLoginLocator(locator);
+  await setupDashboardLocator(locator);
+}
+
+/// Replaces a previously registered access token.
+void registerAccessToken(String token) {
+  if (locator.isRegistered<String>(instanceName: 'accessToken')) {
+    locator.unregister<String>(instanceName: 'accessToken');
+  }
+  locator.registerSingleton<String>(token, instanceName: 'accessToken');
+}
+```
+
+#### Feature DI example (login_di.dart)
+```dart
+import 'package:get_it/get_it.dart';
+
+Future<void> setupLoginLocator(GetIt locator) async {
+  // Data sources
+  locator.registerLazySingleton<UserRemoteDataSource>(
+    () => UserRemoteDataSourceImpl(client: locator()),
+  );
+  locator.registerLazySingleton<UserLocalDataSource>(
+    () => UserLocalDataSourceImpl(sharedPreferences: locator()),
+  );
+
+  // Repository
+  locator.registerLazySingleton<UserRepository>(
+    () => UserRepositoryImpl(
+      remoteDataSource: locator(),
+      localDataSource: locator(),
+      networkInfo: locator(),
+    ),
+  );
+
+  // Use cases
+  locator.registerLazySingleton(() => GetUser(locator()));
+
+  // Bloc — always factory
+  locator.registerFactory(() => UserBloc(getUser: locator()));
+}
+```

@@ -1,0 +1,50 @@
+---
+description: App-wide flutter gen-l10n with ARB files and LocaleCubit
+globs: lib/l10n/**/*,lib/**/*.dart,l10n.yaml
+alwaysApply: false
+---
+### Flutter localization
+
+#### Packages
+- Use `flutter_localizations` (SDK) and `intl` (version resolved by the Flutter SDK — do not hard-pin a conflicting version)
+
+```yaml
+dependencies:
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+```
+
+#### Single source of strings (required)
+- Store all UI strings in root ARB files under `lib/l10n/` (e.g. `app_en.arb`, `app_fa.arb`)
+- Do **not** create per-feature localization classes (`LoginLocalizations`, etc.)
+- Use `flutter gen-l10n` / the generated `AppLocalizations` class only
+- Access strings with `AppLocalizations.of(context).someKey` (never `Localizations.of(context, AppLocalizations)`)
+- Never hardcode UI strings; put non-translatable values in `lib/core/constants.dart`
+
+#### l10n.yaml
+```yaml
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+```
+
+#### ARB metadata (not JSON comments)
+```json
+{
+  "@@locale": "en",
+  "loginButton": "Login",
+  "@loginButton": {
+    "description": "Primary login button label on the login page"
+  }
+}
+```
+
+#### Runtime locale
+- Manage locale with `LocaleCubit` (or Bloc)
+- Register `LocaleCubit` with `registerLazySingleton` (app-wide)
+- Persist the selected locale (e.g. `shared_preferences`)
+- Wire `MaterialApp.locale` / `supportedLocales` / `localizationsDelegates` from that cubit
+- Support RTL via Flutter's directionality when using `fa`, `ar`, etc.

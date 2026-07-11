@@ -1,0 +1,171 @@
+{
+  "@@locale": "en",
+  "appName": "Orbit",
+  "@appName": {
+    "description": "Brand name shown in the app bar and widget"
+  },
+  "addCurrencyTitle": "Add Currency",
+  "@addCurrencyTitle": {
+    "description": "Title of the Add Currency screen"
+  },
+  "searchCurrencyHint": "Search currency or country",
+  "@searchCurrencyHint": {
+    "description": "Placeholder in the currency search field"
+  },
+  "popularSection": "Popular",
+  "@popularSection": {
+    "description": "Section header for popular currencies"
+  },
+  "trendingBadge": "TRENDING",
+  "@trendingBadge": {
+    "description": "Badge shown next to trending currencies"
+  },
+  "ratesUpdated": "Rates updated {time}",
+  "@ratesUpdated": {
+    "description": "Footer showing when rates were last refreshed",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesUpdatedJustNow": "just now",
+  "@ratesUpdatedJustNow": {
+    "description": "Relative time when rates were updated moments ago"
+  },
+  "ratesUpdatedMinutesAgo": "{minutes} min ago",
+  "@ratesUpdatedMinutesAgo": {
+    "description": "Relative time in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "ratesUpdatedHoursAgo": "{hours}h ago",
+  "@ratesUpdatedHoursAgo": {
+    "description": "Relative time in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "liveRate": "Live Rate",
+  "@liveRate": {
+    "description": "Label above the live rate on the detail screen"
+  },
+  "conversionLine": "1 {base} =",
+  "@conversionLine": {
+    "description": "Hero conversion prefix on detail screen",
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "percentToday": "{sign}{value}% today",
+  "@percentToday": {
+    "description": "Today percent change label",
+    "placeholders": {
+      "sign": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "rangeOneDay": "1D",
+  "rangeOneWeek": "1W",
+  "rangeOneMonth": "1M",
+  "rangeSixMonths": "6M",
+  "rangeOneYear": "1Y",
+  "rangeAll": "ALL",
+  "statHigh": "High",
+  "statLow": "Low",
+  "statPercentChange": "% Change",
+  "orbitInsightTitle": "Orbit Insight",
+  "@orbitInsightTitle": {
+    "description": "Title of the insight card on the detail screen"
+  },
+  "orbitInsightBody": "{currency} remains active against the selected base. Indicative reference rates are updated daily from official sources.",
+  "@orbitInsightBody": {
+    "description": "Static insight copy for v1",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Language row label in settings"
+  },
+  "settingsEnglish": "English",
+  "settingsPersian": "Persian",
+  "settingsPlaceholder": "More settings coming soon.",
+  "@settingsPlaceholder": {
+    "description": "Placeholder body on the settings screen"
+  },
+  "navConvert": "Convert",
+  "navChart": "Chart",
+  "navSettings": "Settings",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "@errorGeneric": {
+    "description": "Generic error message"
+  },
+  "errorNetwork": "No internet connection. Showing cached rates if available.",
+  "@errorNetwork": {
+    "description": "Network failure message"
+  },
+  "errorServer": "Unable to reach the rates service.",
+  "@errorServer": {
+    "description": "Server failure message"
+  },
+  "errorCache": "No cached rates found. Connect to the internet to refresh.",
+  "@errorCache": {
+    "description": "Cache miss failure message"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button label"
+  },
+  "emptyCurrencies": "No currencies selected yet. Tap + to add one.",
+  "@emptyCurrencies": {
+    "description": "Empty state on the home list"
+  },
+  "emptySearch": "No currencies match your search.",
+  "@emptySearch": {
+    "description": "Empty state when search has no results"
+  },
+  "editList": "Edit list",
+  "@editList": {
+    "description": "Semantics / tooltip for the edit affordance"
+  },
+  "addCurrencyAction": "Add currency",
+  "@addCurrencyAction": {
+    "description": "Semantics / tooltip for the add button"
+  },
+  "baseCurrency": "Base: {code}",
+  "@baseCurrency": {
+    "description": "Widget base currency pill",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "details": "Details",
+  "@details": {
+    "description": "Widget details affordance"
+  },
+  "indicativeRatesDisclaimer": "Rates are indicative reference values, not bank cash rates.",
+  "@indicativeRatesDisclaimer": {
+    "description": "Honesty disclaimer for FX rates"
+  }
+}

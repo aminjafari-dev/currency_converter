@@ -1,0 +1,13 @@
+---
+description: Performance guidelines for Flutter widgets and data loading
+globs: lib/**/*.dart
+alwaysApply: false
+---
+### Performance Considerations
+- Use const constructors for immutable widgets
+- Implement efficient list rendering with ListView.builder
+- Minimize widget rebuilds with proper state management (e.g. `BlocSelector`, build-when)
+- Use computation isolation for expensive operations with compute()
+- Implement pagination for large data sets
+- Cache network resources appropriately
+- Profile and optimize render performance

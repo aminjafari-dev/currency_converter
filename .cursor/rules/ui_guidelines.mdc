@@ -1,0 +1,97 @@
+---
+description: Shared widgets, theme, Gap, ImagePath, and UI implementation rules
+globs: lib/**/*.dart
+alwaysApply: false
+---
+## Core UI Principles
+
+- If you are in agent mode, implement and update code across the codebase as needed to satisfy the request
+- Add short documentation comments before classes and public functions: purpose, how to use, and a brief example
+- Before non-obvious conditions, explain why the branch exists and how it helps in this snippet
+- Use Flutter localization for every user-facing string (`AppLocalizations`)
+- Use the Gap package for spacing; define shared gaps in a `GGap` class and use only those
+- Define and use `GScaffold`, `GText`, and `GButton` instead of raw `Scaffold` / `Text` / `ElevatedButton` (and similar) in feature UI
+- Put all asset paths in an `ImagePath` class and reference paths only from there
+- Define colors/typography in the theme (`app_theme`); never use ad-hoc color literals in widgets
+- Before using a new color, add or update it in `app_theme`, then consume it from the theme
+- Write/update each feature's `README.md` using `readme_structure.mdc`
+- Local data sources live in `data/datasources/local/`
+- Remote APIs live in `data/datasources/remote/`
+
+### UI Implementation Example
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:project/core/locator.dart';
+import 'package:project/core/widgets/g_button.dart';
+import 'package:project/core/widgets/g_scaffold.dart';
+import 'package:project/core/widgets/g_text.dart';
+import 'package:project/core/widgets/g_gap.dart';
+import 'package:project/features/login/presentation/bloc/login_bloc.dart';
+import 'package:project/features/login/presentation/bloc/login_event.dart';
+import 'package:project/features/login/presentation/bloc/login_state.dart';
+import 'package:project/features/login/presentation/widgets/login_form.dart';
+import 'package:project/features/login/presentation/widgets/login_error_view.dart';
+
+/// Main login screen for the login feature.
+/// Example: Navigator.pushNamed(context, PageName.login);
+class LoginPage extends StatelessWidget {
+  final String userId;
+
+  const LoginPage({super.key, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return BlocProvider(
+      create: (_) => locator<LoginBloc>()
+        ..add(LoginEvent.login(userId: userId)),
+      child: GScaffold(
+        appBar: AppBar(
+          title: GText(l10n.loginTitle),
+          actions: [
+            BlocBuilder<LoginBloc, LoginState>(
+              builder: (context, state) => IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  context.read<LoginBloc>().add(
+                        LoginEvent.login(userId: userId),
+                      );
+                },
+              ),
+            ),
+          ],
+        ),
+        body: BlocListener<LoginBloc, LoginState>(
+          listener: (context, state) {
+            state.login.when(
+              initial: () {},
+              loading: () {},
+              completed: (_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: GText(l10n.loginSuccess)),
+                );
+              },
+              error: (message) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: GText(l10n.loginError(message))),
+                );
+              },
+            );
+          },
+          child: BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) => state.login.when(
+              initial: () => const SizedBox.shrink(),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              completed: (user) => LoginForm(user: user),
+              error: (message) => LoginErrorView(message: message),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```

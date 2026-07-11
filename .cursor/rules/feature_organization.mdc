@@ -1,0 +1,46 @@
+---
+description: Feature-first folder structure for Clean Architecture Flutter apps
+alwaysApply: true
+---
+### Feature-First Organization
+- Organize code by features instead of technical layers
+- Each feature is a self-contained module with its own implementation of all layers
+- Core or shared functionality goes in a separate `core` directory
+- Features should have minimal dependencies on other features
+- Place each feature's DI file at the feature root (e.g. `login_di.dart`)
+- Common directory structure for each feature:
+
+```
+lib/
+├── core/
+│   ├── error/                     # Failures, exceptions, error mapping
+│   ├── network/                   # Network config, interceptors, API client
+│   ├── router/                    # page_name.dart, page_router.dart
+│   ├── theme/                     # app_theme and design tokens
+│   ├── utils/                     # Utility functions, extensions, formatters
+│   ├── widgets/                   # Reusable global widgets (GScaffold, GText, GButton, GGap)
+│   └── locator.dart               # Orchestrates feature DI setup only
+├── features/
+│   ├── feature_a/
+│   │   ├── feature_a_di.dart      # Feature-specific dependency registration
+│   │   ├── data/
+│   │   │   ├── datasources/
+│   │   │   │   ├── local/         # Local storage: DB, cache, shared prefs
+│   │   │   │   │   └── user_local_data_source.dart
+│   │   │   │   └── remote/        # API requests and remote data fetching
+│   │   │   │       └── user_remote_data_source.dart
+│   │   │   ├── models/            # DTOs + JSON serialization
+│   │   │   └── repositories/      # Repository implementations
+│   │   ├── domain/
+│   │   │   ├── entities/          # Pure domain objects (no Flutter code)
+│   │   │   ├── repositories/      # Abstract repository interfaces
+│   │   │   └── usecases/          # Business rules, single-responsibility actions
+│   │   ├── presentation/
+│   │   │   ├── bloc/              # State management (Bloc/Cubit)
+│   │   │   ├── pages/             # Screens and navigation entry points
+│   │   │   └── widgets/           # Feature-specific widgets
+│   │   └── README.md              # Feature documentation
+│   └── feature_b/                 # Same structure for other features
+├── l10n/                          # ARB files (app_en.arb, app_fa.arb, ...)
+└── main.dart                      # Application entry point
+```

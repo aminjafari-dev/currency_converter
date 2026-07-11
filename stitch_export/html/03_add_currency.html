@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Orbit - Add Currency</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#636468",
+                    "on-surface": "#e4e2e4",
+                    "primary-fixed": "#c6f24e",
+                    "surface-dim": "#131315",
+                    "on-secondary-container": "#b6b4b7",
+                    "background": "#131315",
+                    "primary-container": "#c6f24e",
+                    "tertiary-container": "#e3e2e6",
+                    "tertiary-fixed": "#e3e2e6",
+                    "on-background": "#e4e2e4",
+                    "surface-container": "#1f1f21",
+                    "on-primary-fixed-variant": "#3a4d00",
+                    "on-tertiary": "#2f3034",
+                    "surface": "#131315",
+                    "outline": "#8e937c",
+                    "on-primary": "#273500",
+                    "surface-container-high": "#2a2a2c",
+                    "secondary-container": "#474649",
+                    "on-surface-variant": "#c4c9b0",
+                    "secondary": "#c8c6c8",
+                    "secondary-fixed": "#e4e2e4",
+                    "surface-container-low": "#1b1b1d",
+                    "secondary-fixed-dim": "#c8c6c8",
+                    "surface-container-highest": "#353437",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed": "#1b1b1d",
+                    "primary": "#ffffff",
+                    "error": "#ffb4ab",
+                    "inverse-surface": "#e4e2e4",
+                    "on-primary-container": "#536d00",
+                    "on-secondary": "#303032",
+                    "tertiary": "#ffffff",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#46474a",
+                    "surface-variant": "#353437",
+                    "inverse-on-surface": "#303032",
+                    "tertiary-fixed-dim": "#c6c6ca",
+                    "surface-container-lowest": "#0e0e10",
+                    "outline-variant": "#444936",
+                    "surface-bright": "#39393b",
+                    "on-error": "#690005",
+                    "on-tertiary-fixed": "#1a1c1f",
+                    "inverse-primary": "#4f6700",
+                    "surface-tint": "#abd533",
+                    "primary-fixed-dim": "#abd533",
+                    "on-secondary-fixed-variant": "#474649",
+                    "on-primary-fixed": "#151f00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "container-margin": "20px",
+                    "md": "16px",
+                    "base": "4px",
+                    "gutter": "12px",
+                    "xl": "32px",
+                    "sm": "12px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "numeral-xl": ["JetBrains Mono"],
+                    "numeral-md": ["JetBrains Mono"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "numeral-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.04em", "fontWeight": "500"}],
+                    "numeral-md": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            background-color: #131315;
+            color: #e4e2e4;
+            -webkit-font-smoothing: antialiased;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131315;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #353437;
+            border-radius: 10px;
+        }
+        .search-glow:focus-within {
+            box-shadow: 0 0 0 1px #c6f24e;
+        }
+        .row-active:active {
+            transform: scale(0.98);
+            background-color: #2a2a2c;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-hidden flex flex-col h-screen">
+<!-- Top Navigation Anchor (As prescribed by JSON, but adapted for focused state) -->
+<!-- Shell Visibility: TopAppBar is kept but without trailing 'add' icon since we are on the Add screen -->
+<header class="bg-background dark:bg-background border-b border-surface-container-highest dark:border-surface-container-highest flex justify-between items-center w-full px-container-margin h-16 z-50 sticky top-0">
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-150 text-on-surface">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface dark:text-on-surface">Add Currency</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-primary-fixed">language</span>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto custom-scrollbar">
+<!-- Search Header Canvas -->
+<section class="px-container-margin py-lg bg-surface-container-low sticky top-0 z-40">
+<div class="relative search-glow group rounded-xl bg-surface-container-high transition-all duration-300">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary-fixed transition-colors">search</span>
+</div>
+<input class="block w-full pl-xl pr-md py-md bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-tertiary-container font-body-md rounded-xl" placeholder="Search currency or country" type="text"/>
+</div>
+</section>
+<!-- Currency List Container -->
+<div class="px-container-margin space-y-xl pb-32">
+<!-- Popular Section -->
+<section>
+<div class="flex items-center justify-between mb-sm">
+<h2 class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">Popular</h2>
+<span class="h-px flex-1 bg-surface-container-highest ml-md"></span>
+</div>
+<div class="space-y-base">
+<!-- USD -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A macro high-contrast photographic studio shot of the United States flag texture with dramatic side lighting. The fabric shows fine weaving details against a dark charcoal background, maintaining the high-contrast lime and dark theme of the financial app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcFGNQTq4VR8KqN-kRmEwEiTb_rb9S4Ykc7UUlgpwvaYzVDBryYhepPo9L8QD4ai-5hk83iYLyAZ792xko3FImcc7aOk7-kPlm-LI_MW6hHBrU0a8xamFls7cE8uBM1sDzanRqIdpTWOREvkhFOrJTNXLSk95v1nqLEKRuLae0nQ9xOJhUt-WIzY2zTxX_-izxpcbVLn1bIhwPeG70wGgJYPziV3iiUo-E3O-K9vMCiPeBeVL8udXRLv1kpFT4vuhEVtdZ0Ys6FGI"/>
+</div>
+<div>
+<div class="flex items-center gap-xs">
+<span class="font-numeral-md text-numeral-md text-on-surface">USD</span>
+<span class="text-label-sm font-label-sm px-xs py-[2px] bg-primary-fixed/10 text-primary-fixed rounded">TRENDING</span>
+</div>
+<span class="text-body-md text-on-surface-variant text-sm">US Dollar</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- EUR -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A stylized minimalist graphic of the European Union flag using deep navy and neon lime accents. The circle of stars is rendered in glowing lime green against a dark textile background, capturing a modern fintech aesthetic for a currency app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDth8o0rciDUhgLSQ78PrMo5G5QqIhn7ZVbht2WniFDR_zEIM7sAL7drJlNOVgXu1l2t-mwfK1mmoVMexdu6ovl6ztra5kwf3AOh02o6wygS7HSkBKaZbXw4tguEA6Jaum32Kg1H6MO2O365eW37eK6PPFx9Vhtw33yMoF6ud0oWXLgW_hY6yg7m117jCnx6UgzXyPa9r1I248uZ_e-z23Vc4jXeGtFUukvSsnu1POQmzWyfgxUx66FYiZmnSodu88oVloamdfHvyI"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">EUR</span>
+<span class="text-body-md text-on-surface-variant text-sm">Euro</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- AMD -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="An abstract representation of the Armenian flag colors, Red, Blue, and Orange, rendered with a sleek satin finish and moody dark shadows. The image is part of a premium dark-themed interface for a global travel finance application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgp60VTiZhXZt_9kmIFRYO0WWWGoRmi3cJlBPnyy891Uwzd_lsalTLQBIN3cNX-S2gtHHqSkWjy3MBKrjvhiWYV_3aSvKS6Be9Jlbp5GNU7uJhFDK7HaK2z-YmnCpbOfsTQB-3peRNBo4avniPKwvXr6QYiMwuMF-9uuzG4_cH2D8VOOCJM49uhc93lBcASAizhbJAJFMMFp1iIjW3088Ve_EqkQ8rHU6457jClo3YWvjIM59OUvK-PkL4cGt1j6vZU9R7cRrnKmE"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">AMD</span>
+<span class="text-body-md text-on-surface-variant text-sm">Armenian Dram</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- IRR -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Close up of Iranian flag emblem with a dark cinematic lighting style. The colors are muted except for a subtle glowing lime-green edge highlight that ties back to the app's primary brand accent color." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKsWmkCuGRybg_4SHe1X5BkyccIt_SenzJ4XxzD8FVJ7hwCdQu3OxOGr5U7M2SJ1Q0rIy7A6ofdexig3mSWQtokGEFShsd385duJiDl_SjN5XemNzqKJkf-Q2k1C9hH5HIfLv35MHoW-XcYq4Q5PYKBqlgTF_7_zlQtRWTZOjOtEO9AHmG8CX0CM1cTQ6RT5eg7PZdcZ_netnD3uLwHY6r_tNAFPuvNkpaSvxSKR0T9DDxHMtqZpxWUpQtDWOtqIyT44P6yml-IrM"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">IRR</span>
+<span class="text-body-md text-on-surface-variant text-sm">Iranian Rial</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- RUB -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist interpretation of the Russian flag in a dark mode setting. The white, blue, and red bands are visible as sleek, slightly reflective strips of glass or polished stone in a dark environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRiR7kaHNWAGoEsee68aTROGzqM0Y5FoPQOerX6aAZKFKe22ocn86osMYLrvImKp36eJfXPF9G_qaERVXV3qyFnNt1Qbcye5ZED4hwn9BI4WXnxgXIeh3Lh6jTWVC9O0RAnS97Mjjs8CLuGn8uMEabmYL6iiEjAJ6vV7sABllkeIP8F_S-xNIEu7PTu8WoOoe5DDxrXj8Ly1InhYyHbjYMxhlj3Ti13u5aNTpa5JWVAOSvXpXODhv8l3Lr60nBxbL0wGSDyqF5370"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">RUB</span>
+<span class="text-body-md text-on-surface-variant text-sm">Russian Ruble</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- GBP -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="The Union Jack flag detail in high-definition macro, highlighting the texture of the red and white crosses on a dark navy field. Moody, atmospheric lighting with soft bokeh effects, optimized for a sleek dark fintech UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW1MeoovS737PI3i0LfEOtKiQjOB-KhCeeCnRQcV0iH6z7BMImDZtl26UTLBfHm6e6sCYfjzqxPS5RZUFI3qHN2G-v2za2rAC9N_oJ4aqbiqFd84AkeXKRy2HTmV6QZ5Khdz0FbqJqkDYopKW1yYJNtGNH_LJ4HX-31gNwqAKF1E74-6zrwiXTSVtmLrJvZVPO8ujjY-xCGt5IgqlOKQwuW84k9tSGFR5o0m69V211r5MHdq5Gcc4g97LNdyoPIJprhK6f8TfgEGU"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">GBP</span>
+<span class="text-body-md text-on-surface-variant text-sm">British Pound</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Alphabetical Section (A) -->
+<section>
+<div class="flex items-center justify-between mb-sm">
+<h2 class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">A</h2>
+<span class="h-px flex-1 bg-surface-container-highest ml-md"></span>
+</div>
+<div class="space-y-base">
+<!-- AED -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Minimalist representation of the United Arab Emirates flag with sharp geometric divisions. The colors are rendered as matte surfaces in a dark gallery lighting environment to maintain the professional fintech aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW83niHy-LjVlG9xmsK1oUqUo1Hl6gZCPnR2SNppXIdB6tG7kjm3Ed5nD2fpQi8NqfC5x0vL3wHSBEmiIR2STgiOGeVZWMnThOh9DK5g1WT3Q_38I_yZfOySVRds6ksJXKN3WNVkNV1s8oDhaGUOmq0sx8kgNVv6fiya0WGZwYyOouAjdD59fRnn5BMnV2ZeFPIVLp4upcX7v4LiiBcaOF3BUCAUHswTO3rJrfS2n-117y9K6oFJ-hs0VrIlzmcYSQyewhzyzg6RA"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">AED</span>
+<span class="text-body-md text-on-surface-variant text-sm">UAE Dirham</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- AFN -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A stylized flag of Afghanistan presented as a vertical silk banner in a dimly lit space. The deep black, red, and green stripes are highlighted by a single soft spotlight from above, following the brand's dark mode visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUCmBk_tPhiWVArlh3l75p2u5BrrnNGunlV5s8DSODZhXHSqkJMwMptSQaYskBuYO8WMM5TTXNPyANASbvBMXaQxhdcYpgKl-Ek0ED2NY1oB3ZKVF99P-DPxnoALu9LfEGvLUI4LyyWcN7zAPta7l6LT1yF6BVrUFVVZSA4yxIxkeaVB1tyY2JHKW9vzyY33Zm5vMA1uVD-eUiWJ46IOfozqqlSX5Qdsqq4SZHdA0jTW3zvKISwSk18Z0s1ne4JKdctNmoWbb-QkQ"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">AFN</span>
+<span class="text-body-md text-on-surface-variant text-sm">Afghan Afghani</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- ALL -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="An artistic high-contrast shot of the Albanian double-headed eagle emblem in vibrant red against a deep charcoal black background. The image has a clean, professional look consistent with a high-end currency exchange application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8kU8xfzFS2qzKuLLDPWwdTdQYo4v3WoariyQGV8rFZiqq0zdxviJRUudFAJpl6jnPv8HMjzMjX6M0SOoWpjGT_7yUSFBEUxuN_1VuOQgDVgW2SAMdtoVoF5CcbU2f9bRVUtk3zxecaOV1BaBx8-Ll70byRSZP9UrGxfl6PP8gPQbFZ2jzNmmXigb_NhPpjcjdtKg6XAv73cB0NWCUiISMo6xjhOjVRQL2RM4hrksEGJlQg4tiJA_23-Fye4Q5Pz5hzoyS-5S1Ot4"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">ALL</span>
+<span class="text-body-md text-on-surface-variant text-sm">Albanian Lek</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Alphabetical Section (B) -->
+<section>
+<div class="flex items-center justify-between mb-sm">
+<h2 class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest">B</h2>
+<span class="h-px flex-1 bg-surface-container-highest ml-md"></span>
+</div>
+<div class="space-y-base">
+<!-- BHD -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="The Bahraini flag's distinctive sawtooth edge rendered in a crisp minimalist vector style with sharp shadows. Lighting is focused and dramatic, highlighting the clean red and white colors against the app's dark background palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9-ixbwOsbuehqfgJPwNBGWvW7yW_l02uqRNKwNmr7ecrDmrWNj2VKhg0BYPQRU2xxRPKEQ305XMjovKEGsp--MvL7fWphA6dB1NEkBTtwXedq3vsTAkv3eCLWEEq_viRpy2QgY1kyOW_xKcXJEhSpNdAoVKxHH8frvzfWEEAl10Bfe3v1kPJ5X7R458d_UqKjbd-k9oGFeOYUVPkV1EnsoKt90P95WKsWGj9f4UFxATHXLwQw74El_L1QP7VfdZer5hfoaowTSco"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">BHD</span>
+<span class="text-body-md text-on-surface-variant text-sm">Bahraini Dinar</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<!-- BRL -->
+<div class="flex items-center justify-between p-md bg-surface-container rounded-xl border border-surface-container-highest/50 row-active transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A cinematic, low-key lighting photograph of the Brazilian flag's central globe. The green and yellow colors are rich and saturated but kept within a dark, moody environment that emphasizes the precision and speed of the financial app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKa2bPkQeq3HmsJ2VKz7Q4UpG9DFiIuhKZ6h6L_AA-O-ORF065nf9mesFmD9Kxx2VYEhBfnYZdXDzCx74c896FmcHHK3ipp17MeVMNOJifvsZpC90efCLjsNS8cq5d_DRh_6KNjN5Ou67s5ScjDbPefSDhT2i9dbc44W47Oc4zVRHyvDYUJEW4ZAvTCYziWx4ADk15S4eJCzSz6L2-DQi8LhC62tZw6OYRN_ooNu05vrI1-p24yRCSNusW-N5qX0e2lQXFJ5nMRo4"/>
+</div>
+<div>
+<span class="font-numeral-md text-numeral-md text-on-surface block">BRL</span>
+<span class="text-body-md text-on-surface-variant text-sm">Brazilian Real</span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-primary-fixed flex items-center justify-center text-primary-fixed hover:bg-primary-fixed hover:text-on-primary-fixed transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Shell (As prescribed by JSON) -->
+<!-- Shell Relevance: Sub-page (Add Currency), we suppress BottomNavBar for focus according to UX rules -->
+<!-- However, providing the container for fixed elements if needed -->
+<!-- Subtle Floating Action Gradient for Depth -->
+<div class="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none"></div>
+<script>
+        // Micro-interaction for currency selection
+        document.querySelectorAll('.row-active').forEach(row => {
+            row.addEventListener('click', function() {
+                const btn = this.querySelector('button');
+                const icon = btn.querySelector('span');
+                
+                if (icon.innerText === 'add') {
+                    // Visual feedback for addition
+                    icon.innerText = 'check';
+                    btn.classList.remove('text-primary-fixed', 'border-primary-fixed');
+                    btn.classList.add('bg-primary-fixed', 'text-on-primary-fixed', 'border-primary-fixed');
+                } else {
+                    icon.innerText = 'add';
+                    btn.classList.add('text-primary-fixed', 'border-primary-fixed');
+                    btn.classList.remove('bg-primary-fixed', 'text-on-primary-fixed');
+                }
+            });
+        });
+
+        // Search highlight effect
+        const searchInput = document.querySelector('input');
+        const searchContainer = searchInput.closest('div');
+        
+        searchInput.addEventListener('focus', () => {
+            searchContainer.classList.add('bg-surface-container-highest');
+        });
+        
+        searchInput.addEventListener('blur', () => {
+            searchContainer.classList.remove('bg-surface-container-highest');
+        });
+    </script>
+</body></html>

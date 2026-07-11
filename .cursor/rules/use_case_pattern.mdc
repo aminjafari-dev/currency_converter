@@ -1,0 +1,74 @@
+---
+description: Use case and repository implementation patterns with Either
+globs: lib/**/{domain,data}/**/*.dart
+alwaysApply: false
+---
+## Implementation Examples
+
+### Use Case Implementation
+```dart
+import 'package:dartz/dartz.dart';
+
+abstract class UseCase<Type, Params> {
+  Future<Either<Failure, Type>> call(Params params);
+}
+
+/// Fetches a user by id from the repository.
+/// Example: final result = await getUser(userId);
+class GetUser implements UseCase<User, String> {
+  final UserRepository repository;
+
+  GetUser(this.repository);
+
+  @override
+  Future<Either<Failure, User>> call(String userId) async {
+    return repository.getUser(userId);
+  }
+}
+```
+
+### Repository Interface (domain)
+```dart
+/// Domain contract — implemented in the data layer.
+abstract class UserRepository {
+  Future<Either<Failure, User>> getUser(String id);
+  Future<Either<Failure, List<User>>> getUsers();
+  Future<Either<Failure, Unit>> saveUser(User user);
+}
+```
+
+### Repository Implementation (data)
+```dart
+class UserRepositoryImpl implements UserRepository {
+  final UserRemoteDataSource remoteDataSource;
+  final UserLocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
+
+  UserRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.networkInfo,
+  });
+
+  @override
+  Future<Either<Failure, User>> getUser(String id) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteUser = await remoteDataSource.getUser(id);
+        await localDataSource.cacheUser(remoteUser);
+        // Map DTO → domain entity before returning
+        return Right(remoteUser.toDomain());
+      } on ServerException {
+        return const Left(ServerFailure());
+      }
+    } else {
+      try {
+        final localUser = await localDataSource.getLastUser();
+        return Right(localUser.toDomain());
+      } on CacheException {
+        return const Left(CacheFailure());
+      }
+    }
+  }
+}
+```
