@@ -43,6 +43,15 @@ class CurrencyRow extends StatefulWidget {
 }
 
 class _CurrencyRowState extends State<CurrencyRow> {
+  /// Max width reserved for the amount field on each currency row.
+  static const double _amountFieldWidth = 160;
+
+  /// Preferred numeral size while the value still fits (matches [AppTextStyles.numeralXl]).
+  static const double _maxAmountFontSize = 40;
+
+  /// Floor size so very large amounts remain readable instead of vanishing.
+  static const double _minAmountFontSize = 14;
+
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
 
@@ -54,8 +63,17 @@ class _CurrencyRowState extends State<CurrencyRow> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.amountText);
+    // Rebuild on every keystroke so the amount font can shrink/grow with length.
+    // Useful when typing 1000000 — the numeral stays inside [_amountFieldWidth].
+    _controller.addListener(_onAmountTextChanged);
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChanged);
+  }
+
+  /// Triggers a rebuild whenever the amount text changes (typing or BLoC sync).
+  /// Example: user appends a digit → font size is recalculated in [build].
+  void _onAmountTextChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onFocusChanged() {
@@ -73,16 +91,55 @@ class _CurrencyRowState extends State<CurrencyRow> {
     if (!_focusNode.hasFocus &&
         widget.amountText != oldWidget.amountText &&
         _controller.text != widget.amountText) {
+      // Detach listener while assigning so we do not call setState during
+      // didUpdateWidget; the upcoming build already reads the new text.
+      _controller.removeListener(_onAmountTextChanged);
       _controller.text = widget.amountText;
+      _controller.addListener(_onAmountTextChanged);
     }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onAmountTextChanged);
     _focusNode.removeListener(_onFocusChanged);
     _focusNode.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Picks the largest font size that still fits [text] inside [maxWidth].
+  ///
+  /// Starts at [_maxAmountFontSize] and steps down until the measured width
+  /// fits, or until [_minAmountFontSize]. Empty fields use a placeholder "0"
+  /// so the caret row keeps a stable height.
+  ///
+  /// Example: `"1,240.00"` → 40; `"12,345,678.90"` → ~22; huge values → 14.
+  double _adaptiveAmountFontSize(String text, Color color) {
+    final measureText = text.isEmpty ? '0' : text;
+    var fontSize = _maxAmountFontSize;
+
+    // Shrink one point at a time until the mono numeral fits the field width.
+    // Useful for long converted amounts that would otherwise clip or overflow.
+    while (fontSize > _minAmountFontSize) {
+      final style = AppTextStyles.numeralXl(color: color).copyWith(
+        fontSize: fontSize,
+        height: 1.2,
+        letterSpacing: -0.04 * fontSize,
+      );
+      final painter = TextPainter(
+        text: TextSpan(text: measureText, style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout();
+
+      if (painter.width <= _amountFieldWidth) {
+        return fontSize;
+      }
+      fontSize -= 1;
+    }
+
+    return _minAmountFontSize;
   }
 
   @override
@@ -90,6 +147,11 @@ class _CurrencyRowState extends State<CurrencyRow> {
     // Green border only while this row's amount field is focused.
     // Useful so tapping EUR clears the highlight from USD immediately.
     final isHighlighted = _hasFocus;
+    final amountColor = isHighlighted
+        ? AppColors.primaryFixed
+        : AppColors.onSurfaceVariant;
+    final amountFontSize =
+        _adaptiveAmountFontSize(_controller.text, amountColor);
 
     return Material(
       color: isHighlighted
@@ -138,7 +200,7 @@ class _CurrencyRowState extends State<CurrencyRow> {
                 ),
               ),
               SizedBox(
-                width: 160,
+                width: _amountFieldWidth,
                 child: TextField(
                   controller: _controller,
                   focusNode: _focusNode,
@@ -149,10 +211,12 @@ class _CurrencyRowState extends State<CurrencyRow> {
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                   ],
-                  style: AppTextStyles.numeralXl(
-                    color: isHighlighted
-                        ? AppColors.primaryFixed
-                        : AppColors.onSurfaceVariant,
+                  // Scale numeralXl down when the typed/converted value no longer
+                  // fits at 40px — keeps short amounts bold and long ones readable.
+                  style: AppTextStyles.numeralXl(color: amountColor).copyWith(
+                    fontSize: amountFontSize,
+                    height: 1.2,
+                    letterSpacing: -0.04 * amountFontSize,
                   ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
