@@ -332,6 +332,24 @@ abstract class AppLocalizations {
   /// **'Edit list'**
   String get editList;
 
+  /// Semantics / tooltip when leaving list-edit mode
+  ///
+  /// In en, this message translates to:
+  /// **'Done editing'**
+  String get doneEditing;
+
+  /// Semantics / tooltip for the remove icon on a currency card
+  ///
+  /// In en, this message translates to:
+  /// **'Remove currency'**
+  String get removeCurrency;
+
+  /// Semantics / tooltip for the drag handle on a currency card
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder currency'**
+  String get reorderCurrency;
+
   /// Semantics / tooltip for the add button
   ///
   /// In en, this message translates to:

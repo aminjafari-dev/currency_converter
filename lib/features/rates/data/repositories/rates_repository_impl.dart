@@ -224,6 +224,40 @@ class RatesRepositoryImpl implements RatesRepository {
     }
   }
 
+  /// Saves [orderedCodes] as the new Home-list order while keeping each
+  /// currency's base flag. Rejects lists that are not a permutation of the
+  /// current selection so we never silently drop or invent codes.
+  ///
+  /// Example: user drags EUR above USD → `['EUR', 'USD', 'GBP']`.
+  @override
+  Future<Either<Failure, List<SelectedCurrency>>> reorderSelectedCurrencies(
+    List<String> orderedCodes,
+  ) async {
+    try {
+      final current = await localDataSource.getSelectedCurrencies();
+      final byCode = {
+        for (final c in current) c.code: c,
+      };
+      final normalized = orderedCodes.map((c) => c.toUpperCase()).toList();
+
+      // Same length + every code already selected = valid reorder permutation.
+      // Useful so a stale UI cannot wipe the user's list with a partial order.
+      if (normalized.length != current.length ||
+          normalized.toSet().length != normalized.length ||
+          !normalized.every(byCode.containsKey)) {
+        return const Left(
+          ValidationFailure('Invalid currency order'),
+        );
+      }
+
+      final updated = normalized.map((code) => byCode[code]!).toList();
+      final saved = await localDataSource.saveSelectedCurrencies(updated);
+      return Right(saved);
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    }
+  }
+
   @override
   Future<Either<Failure, DateTime?>> getLastUpdatedAt() async {
     try {

@@ -22,7 +22,7 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 - **Presentation**
   - `bloc/home_*.dart` — freezed events/states + `HomeBloc`
   - `pages/home_page.dart` — Stitch Home list UI
-  - `widgets/currency_row.dart` — in-place editable amount on every row
+  - `widgets/currency_row.dart` — editable amount (normal) or remove + drag handles (edit mode)
 
 ## Use Cases
 
@@ -34,8 +34,8 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
    **Description:** Pure triangular conversion using a snapshot rate map.  
    **Data Flow:** `HomeBloc -> ConvertAmount` (no I/O)
 
-3. **Use Case:** `AddSelectedCurrency` / `RemoveSelectedCurrency` / `SetBaseCurrency`  
-   **Description:** Persist the Home list selection.  
+3. **Use Case:** `AddSelectedCurrency` / `RemoveSelectedCurrency` / `SetBaseCurrency` / `ReorderSelectedCurrencies`  
+   **Description:** Persist the Home list selection, base, and display order.  
    **Data Flow:** `HomeBloc / AddCurrencyBloc -> UseCase -> RatesRepository -> RatesLocalDataSource`
 
 ## Data Flow
@@ -47,7 +47,10 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 5. BLoC realigns every other currency via `ConvertAmount` on the cached snapshot (no network)
 6. Pull-to-refresh calls `RefreshRates` and updates the timestamp footer
 7. Long-press a row to change the persisted base (local recalculation only)
-8. Swipe a row end-to-start to remove it from the list
+8. Swipe a row end-to-start (or tap remove in edit mode) to remove it from the list
+9. Tap the pen icon → `editModeToggled`; each card shows remove + drag handles
+10. Drag a handle → `currenciesReordered` → `ReorderSelectedCurrencies` persists the new order
+11. Tap the check icon to leave edit mode
 
 ## Key Components
 
@@ -57,3 +60,4 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 - Dio + Frankfurter v1
 - SharedPreferences cache
 - GetIt feature DI
+- `SliverReorderableList` for Home list edit mode

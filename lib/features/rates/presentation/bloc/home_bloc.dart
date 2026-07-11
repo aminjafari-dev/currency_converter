@@ -33,6 +33,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetSelectedCurrencies getSelectedCurrencies;
   final SetBaseCurrency setBaseCurrency;
   final RemoveSelectedCurrency removeSelectedCurrency;
+  final ReorderSelectedCurrencies reorderSelectedCurrencies;
   final ConvertAmount convertAmount;
   final RefreshRates refreshRates;
   final GetSupportedCurrencies getSupportedCurrencies;
@@ -42,6 +43,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required this.getSelectedCurrencies,
     required this.setBaseCurrency,
     required this.removeSelectedCurrency,
+    required this.reorderSelectedCurrencies,
     required this.convertAmount,
     required this.refreshRates,
     required this.getSupportedCurrencies,
@@ -53,6 +55,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         amountChanged: (code, amount) => _onAmountChanged(code, amount, emit),
         baseChanged: (code) => _onBaseChanged(code, emit),
         currencyRemoved: (code) => _onCurrencyRemoved(code, emit),
+        editModeToggled: () => _onEditModeToggled(emit),
+        currenciesReordered: (oldIndex, newIndex) =>
+            _onCurrenciesReordered(oldIndex, newIndex, emit),
       );
     });
   }
@@ -279,6 +284,76 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           baseAmount: seedAmount,
           convertedAmounts: converted,
         ),
+      ));
+    }
+  }
+
+  /// Flips [HomeState.isEditing] so the UI can show/hide remove + drag handles.
+  ///
+  /// Pure UI flag — no repository call. Useful when the user taps the pen icon
+  /// to enter list-edit mode, or taps done (check) to leave it.
+  Future<void> _onEditModeToggled(Emitter<HomeState> emit) async {
+    if (!emit.isDone) {
+      emit(state.copyWith(isEditing: !state.isEditing));
+    }
+  }
+
+  /// Reorders the selected list after a drag, then persists the new sequence.
+  ///
+  /// Optimistically updates UI first so the card snaps into place immediately;
+  /// if persistence fails we restore the previous order.
+  ///
+  /// [newIndex] is already adjusted by [SliverReorderableList.onReorderItem]
+  /// (no extra `newIndex -= 1` here).
+  ///
+  /// Example: dragging GBP from index 2 to 0 → list becomes [GBP, USD, EUR].
+  Future<void> _onCurrenciesReordered(
+    int oldIndex,
+    int newIndex,
+    Emitter<HomeState> emit,
+  ) async {
+    final current = state.load;
+    if (current is! HomeLoadCompleted) return;
+
+    if (oldIndex == newIndex) return;
+    if (oldIndex < 0 ||
+        oldIndex >= current.selected.length ||
+        newIndex < 0 ||
+        newIndex >= current.selected.length) {
+      return;
+    }
+
+    final reordered = List<SelectedCurrency>.from(current.selected);
+    final moved = reordered.removeAt(oldIndex);
+    reordered.insert(newIndex, moved);
+
+    // Optimistic UI update — the drag animation already finished.
+    if (!emit.isDone) {
+      emit(state.copyWith(
+        load: current.copyWith(selected: reordered),
+      ));
+    }
+
+    final result = await reorderSelectedCurrencies(
+      reordered.map((c) => c.code).toList(),
+    );
+    List<SelectedCurrency>? saved;
+    Failure? failure;
+    result.fold((f) => failure = f, (s) => saved = s);
+
+    // Roll back if save failed so the list matches persisted storage.
+    if (failure != null || saved == null) {
+      if (!emit.isDone) {
+        emit(state.copyWith(
+          load: current.copyWith(selected: current.selected),
+        ));
+      }
+      return;
+    }
+
+    if (!emit.isDone) {
+      emit(state.copyWith(
+        load: current.copyWith(selected: saved!),
       ));
     }
   }

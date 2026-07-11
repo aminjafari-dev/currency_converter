@@ -55,6 +55,8 @@ extension HomeEventPatterns on HomeEvent {
     TResult Function(HomeAmountChanged value)? amountChanged,
     TResult Function(HomeBaseChanged value)? baseChanged,
     TResult Function(HomeCurrencyRemoved value)? currencyRemoved,
+    TResult Function(HomeEditModeToggled value)? editModeToggled,
+    TResult Function(HomeCurrenciesReordered value)? currenciesReordered,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -69,6 +71,10 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that);
+      case HomeEditModeToggled() when editModeToggled != null:
+        return editModeToggled(_that);
+      case HomeCurrenciesReordered() when currenciesReordered != null:
+        return currenciesReordered(_that);
       case _:
         return orElse();
     }
@@ -94,6 +100,9 @@ extension HomeEventPatterns on HomeEvent {
     required TResult Function(HomeAmountChanged value) amountChanged,
     required TResult Function(HomeBaseChanged value) baseChanged,
     required TResult Function(HomeCurrencyRemoved value) currencyRemoved,
+    required TResult Function(HomeEditModeToggled value) editModeToggled,
+    required TResult Function(HomeCurrenciesReordered value)
+        currenciesReordered,
   }) {
     final _that = this;
     switch (_that) {
@@ -107,6 +116,10 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that);
       case HomeCurrencyRemoved():
         return currencyRemoved(_that);
+      case HomeEditModeToggled():
+        return editModeToggled(_that);
+      case HomeCurrenciesReordered():
+        return currenciesReordered(_that);
     }
   }
 
@@ -129,6 +142,8 @@ extension HomeEventPatterns on HomeEvent {
     TResult? Function(HomeAmountChanged value)? amountChanged,
     TResult? Function(HomeBaseChanged value)? baseChanged,
     TResult? Function(HomeCurrencyRemoved value)? currencyRemoved,
+    TResult? Function(HomeEditModeToggled value)? editModeToggled,
+    TResult? Function(HomeCurrenciesReordered value)? currenciesReordered,
   }) {
     final _that = this;
     switch (_that) {
@@ -142,6 +157,10 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that);
+      case HomeEditModeToggled() when editModeToggled != null:
+        return editModeToggled(_that);
+      case HomeCurrenciesReordered() when currenciesReordered != null:
+        return currenciesReordered(_that);
       case _:
         return null;
     }
@@ -166,6 +185,8 @@ extension HomeEventPatterns on HomeEvent {
     TResult Function(String code, double amount)? amountChanged,
     TResult Function(String code)? baseChanged,
     TResult Function(String code)? currencyRemoved,
+    TResult Function()? editModeToggled,
+    TResult Function(int oldIndex, int newIndex)? currenciesReordered,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -180,6 +201,10 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that.code);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that.code);
+      case HomeEditModeToggled() when editModeToggled != null:
+        return editModeToggled();
+      case HomeCurrenciesReordered() when currenciesReordered != null:
+        return currenciesReordered(_that.oldIndex, _that.newIndex);
       case _:
         return orElse();
     }
@@ -205,6 +230,8 @@ extension HomeEventPatterns on HomeEvent {
     required TResult Function(String code, double amount) amountChanged,
     required TResult Function(String code) baseChanged,
     required TResult Function(String code) currencyRemoved,
+    required TResult Function() editModeToggled,
+    required TResult Function(int oldIndex, int newIndex) currenciesReordered,
   }) {
     final _that = this;
     switch (_that) {
@@ -218,6 +245,10 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that.code);
       case HomeCurrencyRemoved():
         return currencyRemoved(_that.code);
+      case HomeEditModeToggled():
+        return editModeToggled();
+      case HomeCurrenciesReordered():
+        return currenciesReordered(_that.oldIndex, _that.newIndex);
     }
   }
 
@@ -240,6 +271,8 @@ extension HomeEventPatterns on HomeEvent {
     TResult? Function(String code, double amount)? amountChanged,
     TResult? Function(String code)? baseChanged,
     TResult? Function(String code)? currencyRemoved,
+    TResult? Function()? editModeToggled,
+    TResult? Function(int oldIndex, int newIndex)? currenciesReordered,
   }) {
     final _that = this;
     switch (_that) {
@@ -253,6 +286,10 @@ extension HomeEventPatterns on HomeEvent {
         return baseChanged(_that.code);
       case HomeCurrencyRemoved() when currencyRemoved != null:
         return currencyRemoved(_that.code);
+      case HomeEditModeToggled() when editModeToggled != null:
+        return editModeToggled();
+      case HomeCurrenciesReordered() when currenciesReordered != null:
+        return currenciesReordered(_that.oldIndex, _that.newIndex);
       case _:
         return null;
     }
@@ -494,6 +531,101 @@ class _$HomeCurrencyRemovedCopyWithImpl<$Res>
           ? _self.code
           : code // ignore: cast_nullable_to_non_nullable
               as String,
+    ));
+  }
+}
+
+/// @nodoc
+
+class HomeEditModeToggled implements HomeEvent {
+  const HomeEditModeToggled();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is HomeEditModeToggled);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'HomeEvent.editModeToggled()';
+  }
+}
+
+/// @nodoc
+
+class HomeCurrenciesReordered implements HomeEvent {
+  const HomeCurrenciesReordered(
+      {required this.oldIndex, required this.newIndex});
+
+  final int oldIndex;
+  final int newIndex;
+
+  /// Create a copy of HomeEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $HomeCurrenciesReorderedCopyWith<HomeCurrenciesReordered> get copyWith =>
+      _$HomeCurrenciesReorderedCopyWithImpl<HomeCurrenciesReordered>(
+          this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is HomeCurrenciesReordered &&
+            (identical(other.oldIndex, oldIndex) ||
+                other.oldIndex == oldIndex) &&
+            (identical(other.newIndex, newIndex) ||
+                other.newIndex == newIndex));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, oldIndex, newIndex);
+
+  @override
+  String toString() {
+    return 'HomeEvent.currenciesReordered(oldIndex: $oldIndex, newIndex: $newIndex)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $HomeCurrenciesReorderedCopyWith<$Res>
+    implements $HomeEventCopyWith<$Res> {
+  factory $HomeCurrenciesReorderedCopyWith(HomeCurrenciesReordered value,
+          $Res Function(HomeCurrenciesReordered) _then) =
+      _$HomeCurrenciesReorderedCopyWithImpl;
+  @useResult
+  $Res call({int oldIndex, int newIndex});
+}
+
+/// @nodoc
+class _$HomeCurrenciesReorderedCopyWithImpl<$Res>
+    implements $HomeCurrenciesReorderedCopyWith<$Res> {
+  _$HomeCurrenciesReorderedCopyWithImpl(this._self, this._then);
+
+  final HomeCurrenciesReordered _self;
+  final $Res Function(HomeCurrenciesReordered) _then;
+
+  /// Create a copy of HomeEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? oldIndex = null,
+    Object? newIndex = null,
+  }) {
+    return _then(HomeCurrenciesReordered(
+      oldIndex: null == oldIndex
+          ? _self.oldIndex
+          : oldIndex // ignore: cast_nullable_to_non_nullable
+              as int,
+      newIndex: null == newIndex
+          ? _self.newIndex
+          : newIndex // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }

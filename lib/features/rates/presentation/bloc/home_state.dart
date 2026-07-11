@@ -24,10 +24,19 @@ sealed class HomeLoadState with _$HomeLoadState {
 
 /// Combined Home screen state.
 ///
-/// Amounts are always editable in-place; there is no separate list-edit mode.
+/// [isEditing] is true after the user taps the pen icon — each card then shows
+/// remove and drag handles instead of the editable amount field.
+///
+/// Example:
+/// ```dart
+/// if (state.isEditing) {
+///   // Show ReorderableDragStartListener + remove button on each row.
+/// }
+/// ```
 @freezed
 sealed class HomeState with _$HomeState {
   const factory HomeState({
     required HomeLoadState load,
+    @Default(false) bool isEditing,
   }) = _HomeState;
 }

@@ -41,6 +41,7 @@ Future<void> setupRatesLocator(GetIt locator) async {
   locator.registerLazySingleton(() => GetSelectedCurrencies(locator()));
   locator.registerLazySingleton(() => AddSelectedCurrency(locator()));
   locator.registerLazySingleton(() => RemoveSelectedCurrency(locator()));
+  locator.registerLazySingleton(() => ReorderSelectedCurrencies(locator()));
   locator.registerLazySingleton(() => SetBaseCurrency(locator()));
   locator.registerLazySingleton(() => RefreshRates(locator()));
   locator.registerLazySingleton(() => GetLastUpdatedAt(locator()));
@@ -52,6 +53,7 @@ Future<void> setupRatesLocator(GetIt locator) async {
       getSelectedCurrencies: locator(),
       setBaseCurrency: locator(),
       removeSelectedCurrency: locator(),
+      reorderSelectedCurrencies: locator(),
       convertAmount: locator(),
       refreshRates: locator(),
       getSupportedCurrencies: locator(),

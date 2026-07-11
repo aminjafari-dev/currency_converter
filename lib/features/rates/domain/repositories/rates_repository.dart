@@ -44,6 +44,16 @@ abstract class RatesRepository {
   /// Sets [code] as the base (editable) currency.
   Future<Either<Failure, List<SelectedCurrency>>> setBaseCurrency(String code);
 
+  /// Persists a new display order for selected currencies.
+  ///
+  /// [orderedCodes] must be a permutation of the current selection (same
+  /// codes, no extras). Base flags are preserved per code.
+  ///
+  /// Example: `reorderSelectedCurrencies(['EUR', 'USD', 'GBP'])`
+  Future<Either<Failure, List<SelectedCurrency>>> reorderSelectedCurrencies(
+    List<String> orderedCodes,
+  );
+
   /// Timestamp of the last successful rate cache write, if any.
   Future<Either<Failure, DateTime?>> getLastUpdatedAt();
 }

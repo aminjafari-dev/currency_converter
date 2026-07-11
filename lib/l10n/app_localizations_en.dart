@@ -140,6 +140,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editList => 'Edit list';
 
   @override
+  String get doneEditing => 'Done editing';
+
+  @override
+  String get removeCurrency => 'Remove currency';
+
+  @override
+  String get reorderCurrency => 'Reorder currency';
+
+  @override
   String get addCurrencyAction => 'Add currency';
 
   @override

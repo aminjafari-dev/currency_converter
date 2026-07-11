@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:currency_converter/l10n/app_localizations.dart';
 
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
@@ -10,8 +11,11 @@ import 'package:currency_converter/core/widgets/g_text.dart';
 
 /// Single currency row used on the Home list.
 ///
-/// Every row shows an editable amount. Tapping the row focuses the field so
-/// the keyboard opens immediately; other currencies realign via local conversion.
+/// In normal mode every row shows an editable amount. Tapping focuses the
+/// field; siblings realign via local conversion.
+///
+/// In edit mode ([isEditing] = true) the amount field is replaced by a remove
+/// button and a drag handle so the user can delete or reorder cards.
 ///
 /// Example:
 /// ```dart
@@ -19,7 +23,18 @@ import 'package:currency_converter/core/widgets/g_text.dart';
 ///   code: 'EUR',
 ///   name: 'Euro',
 ///   amountText: '1,142.30',
+///   isEditing: false,
 ///   onAmountChanged: (value) {},
+/// );
+///
+/// // Edit mode — pass [dragIndex] for ReorderableDragStartListener:
+/// CurrencyRow(
+///   code: 'EUR',
+///   name: 'Euro',
+///   amountText: '1,142.30',
+///   isEditing: true,
+///   dragIndex: 0,
+///   onRemove: () {},
 /// );
 /// ```
 class CurrencyRow extends StatefulWidget {
@@ -29,6 +44,15 @@ class CurrencyRow extends StatefulWidget {
   final VoidCallback? onLongPress;
   final ValueChanged<String>? onAmountChanged;
 
+  /// When true, shows remove + drag icons instead of the amount field.
+  final bool isEditing;
+
+  /// Index required by [ReorderableDragStartListener] while editing.
+  final int? dragIndex;
+
+  /// Called when the user taps the remove icon in edit mode.
+  final VoidCallback? onRemove;
+
   const CurrencyRow({
     super.key,
     required this.code,
@@ -36,6 +60,9 @@ class CurrencyRow extends StatefulWidget {
     required this.amountText,
     this.onLongPress,
     this.onAmountChanged,
+    this.isEditing = false,
+    this.dragIndex,
+    this.onRemove,
   });
 
   @override
@@ -86,8 +113,8 @@ class _CurrencyRowState extends State<CurrencyRow> {
   @override
   void didUpdateWidget(covariant CurrencyRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Sync controller from BLoC only when this field is not being typed into —
-    // otherwise rebuilding after converting siblings would fight the keyboard.
+    // Leaving edit mode or syncing from BLoC: keep controller in sync only when
+    // this field is not being typed into — otherwise rebuilds fight the keyboard.
     if (!_focusNode.hasFocus &&
         widget.amountText != oldWidget.amountText &&
         _controller.text != widget.amountText) {
@@ -96,6 +123,12 @@ class _CurrencyRowState extends State<CurrencyRow> {
       _controller.removeListener(_onAmountTextChanged);
       _controller.text = widget.amountText;
       _controller.addListener(_onAmountTextChanged);
+    }
+
+    // Entering edit mode — drop keyboard focus so drag/remove are the only actions.
+    // Useful when the user taps the pen while an amount field is still focused.
+    if (widget.isEditing && !oldWidget.isEditing && _focusNode.hasFocus) {
+      _focusNode.unfocus();
     }
   }
 
@@ -144,9 +177,10 @@ class _CurrencyRowState extends State<CurrencyRow> {
 
   @override
   Widget build(BuildContext context) {
-    // Green border only while this row's amount field is focused.
+    final l10n = AppLocalizations.of(context);
+    // Green border only while this row's amount field is focused (not in edit mode).
     // Useful so tapping EUR clears the highlight from USD immediately.
-    final isHighlighted = _hasFocus;
+    final isHighlighted = !widget.isEditing && _hasFocus;
     final amountColor = isHighlighted
         ? AppColors.primaryFixed
         : AppColors.onSurfaceVariant;
@@ -167,19 +201,41 @@ class _CurrencyRowState extends State<CurrencyRow> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-        onTap: () {
-          // Tap anywhere on the row opens the amount keyboard immediately.
-          _focusNode.requestFocus();
-          _controller.selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: _controller.text.length,
-          );
-        },
-        onLongPress: widget.onLongPress,
+        // In edit mode, taps do nothing — remove/drag icons own the interaction.
+        onTap: widget.isEditing
+            ? null
+            : () {
+                // Tap anywhere on the row opens the amount keyboard immediately.
+                _focusNode.requestFocus();
+                _controller.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: _controller.text.length,
+                );
+              },
+        onLongPress: widget.isEditing ? null : widget.onLongPress,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
+              // Remove affordance — only visible while editing the list.
+              // Useful so the user can delete a currency without swipe gestures.
+              if (widget.isEditing) ...[
+                IconButton(
+                  tooltip: l10n.removeCurrency,
+                  onPressed: widget.onRemove,
+                  icon: const Icon(
+                    Icons.remove_circle_outline,
+                    color: AppColors.error,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                ),
+                GGap.hSm,
+              ],
               CurrencyFlag(code: widget.code, size: 48),
               GGap.hMd,
               Expanded(
@@ -199,34 +255,50 @@ class _CurrencyRowState extends State<CurrencyRow> {
                   ],
                 ),
               ),
-              SizedBox(
-                width: _amountFieldWidth,
-                child: TextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  textAlign: TextAlign.right,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+              // Edit mode: drag handle. Normal mode: editable amount field.
+              if (widget.isEditing)
+                ReorderableDragStartListener(
+                  index: widget.dragIndex ?? 0,
+                  child: Tooltip(
+                    message: l10n.reorderCurrency,
+                    child: const Padding(
+                      padding: EdgeInsets.all(AppSpacing.sm),
+                      child: Icon(
+                        Icons.drag_handle,
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
                   ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                  ],
-                  // Scale numeralXl down when the typed/converted value no longer
-                  // fits at 40px — keeps short amounts bold and long ones readable.
-                  style: AppTextStyles.numeralXl(color: amountColor).copyWith(
-                    fontSize: amountFontSize,
-                    height: 1.2,
-                    letterSpacing: -0.04 * amountFontSize,
+                )
+              else
+                SizedBox(
+                  width: _amountFieldWidth,
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textAlign: TextAlign.right,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                    ],
+                    // Scale numeralXl down when the typed/converted value no longer
+                    // fits at 40px — keeps short amounts bold and long ones readable.
+                    style: AppTextStyles.numeralXl(color: amountColor).copyWith(
+                      fontSize: amountFontSize,
+                      height: 1.2,
+                      letterSpacing: -0.04 * amountFontSize,
+                    ),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      filled: false,
+                    ),
+                    onChanged: widget.onAmountChanged,
                   ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                    filled: false,
-                  ),
-                  onChanged: widget.onAmountChanged,
                 ),
-              ),
             ],
           ),
         ),

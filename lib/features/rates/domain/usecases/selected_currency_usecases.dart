@@ -55,3 +55,25 @@ class SetBaseCurrency implements UseCase<List<SelectedCurrency>, String> {
     return repository.setBaseCurrency(code);
   }
 }
+
+/// Persists a new Home-list order after the user drags a currency card.
+///
+/// Pass the full ordered list of codes (same set as before, new sequence).
+///
+/// Example:
+/// ```dart
+/// await reorderSelectedCurrencies(['EUR', 'USD', 'GBP']);
+/// ```
+class ReorderSelectedCurrencies
+    implements UseCase<List<SelectedCurrency>, List<String>> {
+  final RatesRepository repository;
+
+  ReorderSelectedCurrencies(this.repository);
+
+  @override
+  Future<Either<Failure, List<SelectedCurrency>>> call(
+    List<String> orderedCodes,
+  ) {
+    return repository.reorderSelectedCurrencies(orderedCodes);
+  }
+}

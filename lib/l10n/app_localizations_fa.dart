@@ -141,6 +141,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get editList => 'ویرایش فهرست';
 
   @override
+  String get doneEditing => 'پایان ویرایش';
+
+  @override
+  String get removeCurrency => 'حذف ارز';
+
+  @override
+  String get reorderCurrency => 'جابه‌جایی ارز';
+
+  @override
   String get addCurrencyAction => 'افزودن ارز';
 
   @override

@@ -10,6 +10,7 @@ part 'home_event.freezed.dart';
 /// context.read<HomeBloc>().add(
 ///   HomeEvent.amountChanged(code: 'EUR', amount: 100),
 /// );
+/// context.read<HomeBloc>().add(const HomeEvent.editModeToggled());
 /// ```
 @freezed
 sealed class HomeEvent with _$HomeEvent {
@@ -32,7 +33,23 @@ sealed class HomeEvent with _$HomeEvent {
   /// Amounts realign locally from the visible value on that row — no rate fetch.
   const factory HomeEvent.baseChanged({required String code}) = HomeBaseChanged;
 
-  /// User dismissed a currency from the list (e.g. swipe-to-remove).
+  /// User dismissed a currency from the list (swipe or edit-mode remove).
   const factory HomeEvent.currencyRemoved({required String code}) =
       HomeCurrencyRemoved;
+
+  /// Toggles list-edit mode (pen icon): shows remove + drag handles on each card.
+  ///
+  /// Example: tap the app-bar pen → cards reveal delete and reorder affordances.
+  const factory HomeEvent.editModeToggled() = HomeEditModeToggled;
+
+  /// User dragged a card to a new position while in edit mode.
+  ///
+  /// [oldIndex] / [newIndex] come from [SliverReorderableList.onReorderItem],
+  /// which already adjusts [newIndex] when an item moves downward.
+  ///
+  /// Example: drag EUR from index 2 to the top → `oldIndex: 2, newIndex: 0`.
+  const factory HomeEvent.currenciesReordered({
+    required int oldIndex,
+    required int newIndex,
+  }) = HomeCurrenciesReordered;
 }

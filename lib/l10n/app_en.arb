@@ -147,6 +147,18 @@
   "@editList": {
     "description": "Semantics / tooltip for the edit affordance"
   },
+  "doneEditing": "Done editing",
+  "@doneEditing": {
+    "description": "Semantics / tooltip when leaving list-edit mode"
+  },
+  "removeCurrency": "Remove currency",
+  "@removeCurrency": {
+    "description": "Semantics / tooltip for the remove icon on a currency card"
+  },
+  "reorderCurrency": "Reorder currency",
+  "@reorderCurrency": {
+    "description": "Semantics / tooltip for the drag handle on a currency card"
+  },
   "addCurrencyAction": "Add currency",
   "@addCurrencyAction": {
     "description": "Semantics / tooltip for the add button"
