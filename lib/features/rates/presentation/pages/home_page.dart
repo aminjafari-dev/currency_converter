@@ -209,7 +209,6 @@ class _HomeView extends StatelessWidget {
                     final item = selected[index];
                     final name = catalog[item.code]?.name ?? item.code;
                     final amount = convertedAmounts[item.code] ?? 0;
-                    final isBase = item.isBase;
 
                     // Swipe to remove replaces the old pen + edit-mode affordance.
                     return Dismissible(
@@ -240,7 +239,6 @@ class _HomeView extends StatelessWidget {
                         name: name,
                         amountText:
                             CurrencyFormatter.format(amount, item.code),
-                        isBase: isBase,
                         onLongPress: () {
                           context.read<HomeBloc>().add(
                                 HomeEvent.baseChanged(code: item.code),

@@ -19,7 +19,6 @@ import 'package:currency_converter/core/widgets/g_text.dart';
 ///   code: 'EUR',
 ///   name: 'Euro',
 ///   amountText: '1,142.30',
-///   isBase: false,
 ///   onAmountChanged: (value) {},
 /// );
 /// ```
@@ -27,7 +26,6 @@ class CurrencyRow extends StatefulWidget {
   final String code;
   final String name;
   final String amountText;
-  final bool isBase;
   final VoidCallback? onLongPress;
   final ValueChanged<String>? onAmountChanged;
 
@@ -36,7 +34,6 @@ class CurrencyRow extends StatefulWidget {
     required this.code,
     required this.name,
     required this.amountText,
-    required this.isBase,
     this.onLongPress,
     this.onAmountChanged,
   });
@@ -90,8 +87,9 @@ class _CurrencyRowState extends State<CurrencyRow> {
 
   @override
   Widget build(BuildContext context) {
-    // Highlight the focused (active) row; fall back to base styling when idle.
-    final isHighlighted = _hasFocus || widget.isBase;
+    // Green border only while this row's amount field is focused.
+    // Useful so tapping EUR clears the highlight from USD immediately.
+    final isHighlighted = _hasFocus;
 
     return Material(
       color: isHighlighted
