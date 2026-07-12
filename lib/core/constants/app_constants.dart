@@ -40,6 +40,17 @@ abstract final class AppConstants {
     'RUB',
   };
 
+  /// Synthetic Iranian Toman code (not on Frankfurter — derived as IRR ÷ 10).
+  static const String iranianTomanCode = 'IRT';
+
+  /// Official ISO code for Iranian Rial.
+  static const String iranianRialCode = 'IRR';
+
+  /// Fixed market convention: 1 Toman = 10 Rial (drop one zero).
+  ///
+  /// Example: `1_782_000 IRR / rialPerToman == 178_200 IRT`.
+  static const int rialPerToman = 10;
+
   /// Default selected list when the user has never customized.
   static const List<String> defaultSelectedCurrencies = [
     'USD',
@@ -54,6 +65,7 @@ abstract final class AppConstants {
     'USD',
     'EUR',
     'AMD',
+    'IRT',
     'IRR',
     'RUB',
     'GBP',
@@ -69,5 +81,7 @@ abstract final class AppConstants {
     'VND',
     'CLP',
     'ISK',
+    'IRR',
+    'IRT',
   };
 }

@@ -24,6 +24,9 @@ class CurrencyFlag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // IRT is synthetic (IRR ÷ 10) — reuse the Iranian flag from IRR.
+    final flagCode = code.toUpperCase() == 'IRT' ? 'IRR' : code;
+
     return Container(
       width: size,
       height: size,
@@ -34,7 +37,7 @@ class CurrencyFlag extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: CountryFlag.fromCurrencyCode(
-        code,
+        flagCode,
         width: size,
         height: size,
         shape: const Circle(),

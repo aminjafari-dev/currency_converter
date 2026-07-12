@@ -60,7 +60,8 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 - Frankfurter IRR is an official/reference-style rate and is **not** Iran’s free-market rate.
 - Oanor exposes bazaar prices (TGJU-backed) in IRR (and toman).
 - If Oanor returns `subscription_required` (key not subscribed on the marketplace), the app falls back to **TGJU** (same free-market source) so IRR is never left on Frankfurter’s ~1.37M rate.
-- Charts for pairs involving IRR use Oanor `/v1/history` when possible; otherwise TGJU history for the same foreign codes.
+- Synthetic **IRT** (Iranian Toman) is derived locally as `IRR / 10` (1 Toman = 10 Rial). No extra API.
+- Charts for pairs involving IRR/IRT use Oanor `/v1/history` when possible; otherwise TGJU history for the same foreign codes.
 - API key: `AppConstants.oanorApiKey` (override with `--dart-define=OANOR_API_KEY=…`). Subscribe the key to **Iran Rial Market API** on [oanor.com](https://www.oanor.com/api/irr-api) (click **Subscribe** on the Free plan).
 
 ## Key Components

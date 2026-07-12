@@ -163,4 +163,10 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get indicativeRatesDisclaimer =>
       'نرخ‌ها مرجع تقریبی هستند و نرخ نقدی بانک نیستند.';
+
+  @override
+  String get currencyIranianToman => 'تومان ایران';
+
+  @override
+  String get currencyIranianRial => 'ریال ایران';
 }

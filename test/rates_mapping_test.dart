@@ -189,6 +189,56 @@ void main() {
     });
   });
 
+  group('attachTomanFromRial / rebaseSnapshotToIrt', () {
+    test('derives IRT as IRR divided by 10', () {
+      final snap = RateSnapshotModel.fromJson({
+        'base': 'USD',
+        'date': '2026-07-12',
+        'rates': {'EUR': 0.92, 'IRR': 1782000},
+      });
+
+      final withToman = attachTomanFromRial(snap);
+      expect(withToman.rates['IRT'], 178200);
+      expect(withToman.rates['IRR'], 1782000);
+    });
+
+    test('rebases USD snapshot to IRT base', () {
+      final snap = RateSnapshotModel.fromJson({
+        'base': 'USD',
+        'date': '2026-07-12',
+        'rates': {'EUR': 0.92, 'IRR': 1782000},
+      });
+
+      final irtBase = rebaseSnapshotToIrt(attachTomanFromRial(snap));
+      expect(irtBase.base, 'IRT');
+      expect(irtBase.rates['IRR'], 10);
+      expect(irtBase.rates['USD'], closeTo(1 / 178200, 1e-12));
+      expect(irtBase.rates['EUR'], closeTo(0.92 / 178200, 1e-12));
+    });
+
+    test('scaleHistoryForToman divides USD→IRR closes by 10 for IRT', () {
+      final series = HistoricalSeriesModel(
+        base: 'USD',
+        quote: 'IRR',
+        startDate: '2026-07-01',
+        endDate: '2026-07-02',
+        datedRates: const {'2026-07-01': 1782000, '2026-07-02': 1790000},
+      );
+
+      final scaled = scaleHistoryForToman(
+        series: series,
+        requestedBase: 'USD',
+        requestedQuote: 'IRT',
+        fetchedBase: 'USD',
+        fetchedQuote: 'IRR',
+      );
+
+      expect(scaled.quote, 'IRT');
+      expect(scaled.datedRates['2026-07-01'], 178200);
+      expect(scaled.datedRates['2026-07-02'], 179000);
+    });
+  });
+
   group('CurrencyStats', () {
     test('computes high low and percent change', () {
       final series = HistoricalSeries(

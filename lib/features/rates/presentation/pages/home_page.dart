@@ -6,6 +6,7 @@ import 'package:currency_converter/core/router/page_name.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
+import 'package:currency_converter/core/utils/currency_display_name.dart';
 import 'package:currency_converter/core/utils/currency_formatter.dart';
 import 'package:currency_converter/core/utils/relative_time_formatter.dart';
 import 'package:currency_converter/core/widgets/g_button.dart';
@@ -261,7 +262,12 @@ class _CurrencyList extends StatelessWidget {
             },
             itemBuilder: (context, index) {
               final item = selected[index];
-              final name = catalog[item.code]?.name ?? item.code;
+              final l10n = AppLocalizations.of(context);
+              final name = CurrencyDisplayName.resolve(
+                l10n,
+                item.code,
+                fallback: catalog[item.code]?.name ?? item.code,
+              );
               final amount = convertedAmounts[item.code] ?? 0;
 
               final row = CurrencyRow(

@@ -45,5 +45,7 @@
   "addCurrencyAction": "افزودن ارز",
   "baseCurrency": "پایه: {code}",
   "details": "جزئیات",
-  "indicativeRatesDisclaimer": "نرخ‌ها مرجع تقریبی هستند و نرخ نقدی بانک نیستند."
+  "indicativeRatesDisclaimer": "نرخ‌ها مرجع تقریبی هستند و نرخ نقدی بانک نیستند.",
+  "currencyIranianToman": "تومان ایران",
+  "currencyIranianRial": "ریال ایران"
 }

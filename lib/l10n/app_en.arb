@@ -179,5 +179,13 @@
   "indicativeRatesDisclaimer": "Rates are indicative reference values, not bank cash rates.",
   "@indicativeRatesDisclaimer": {
     "description": "Honesty disclaimer for FX rates"
+  },
+  "currencyIranianToman": "Iranian Toman",
+  "@currencyIranianToman": {
+    "description": "Display name for synthetic IRT (IRR ÷ 10)"
+  },
+  "currencyIranianRial": "Iranian Rial",
+  "@currencyIranianRial": {
+    "description": "Localized display name for IRR"
   }
 }

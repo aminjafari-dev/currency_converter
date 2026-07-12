@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:currency_converter/core/constants/app_constants.dart';
 import 'package:currency_converter/core/error/failures.dart';
 import 'package:currency_converter/core/usecase/usecase.dart';
 import 'package:currency_converter/features/currency_catalog/presentation/bloc/add_currency_event.dart';
@@ -80,19 +81,32 @@ class AddCurrencyBloc extends Bloc<AddCurrencyEvent, AddCurrencyState> {
     // Empty query shows the full catalog again.
     final filtered = q.isEmpty
         ? current.all
-        : current.all
-            .where(
-              (c) =>
-                  c.code.toLowerCase().contains(q) ||
-                  c.name.toLowerCase().contains(q),
-            )
-            .toList();
+        : current.all.where((c) => _matchesQuery(c, q)).toList();
 
     if (!emit.isDone) {
       emit(state.copyWith(
         load: current.copyWith(filtered: filtered, query: query),
       ));
     }
+  }
+
+  /// Matches code/name, plus Toman/Rial aliases (تومان، ریال, …).
+  bool _matchesQuery(Currency currency, String query) {
+    if (currency.code.toLowerCase().contains(query) ||
+        currency.name.toLowerCase().contains(query)) {
+      return true;
+    }
+    final code = currency.code.toUpperCase();
+    // Useful so Persian users find IRT by typing «تومان».
+    if (code == AppConstants.iranianTomanCode) {
+      const aliases = ['toman', 'تومان', 'irt'];
+      return aliases.any((a) => a.contains(query) || query.contains(a));
+    }
+    if (code == AppConstants.iranianRialCode) {
+      const aliases = ['rial', 'ریال', 'irr'];
+      return aliases.any((a) => a.contains(query) || query.contains(a));
+    }
+    return false;
   }
 
   Future<void> _onToggled(String code, Emitter<AddCurrencyState> emit) async {

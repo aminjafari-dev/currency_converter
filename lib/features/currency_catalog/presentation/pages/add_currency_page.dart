@@ -7,6 +7,7 @@ import 'package:currency_converter/core/locator.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
+import 'package:currency_converter/core/utils/currency_display_name.dart';
 import 'package:currency_converter/core/widgets/currency_flag.dart';
 import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
@@ -272,6 +273,8 @@ class _CurrencyCatalogTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.base),
       child: Material(
@@ -324,7 +327,11 @@ class _CurrencyCatalogTile extends StatelessWidget {
                         ],
                       ),
                       GText(
-                        currency.name,
+                        CurrencyDisplayName.resolve(
+                          l10n,
+                          currency.code,
+                          fallback: currency.name,
+                        ),
                         style: AppTextStyles.bodyMd(
                           color: AppColors.onSurfaceVariant,
                         ),

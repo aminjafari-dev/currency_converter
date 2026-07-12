@@ -373,6 +373,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rates are indicative reference values, not bank cash rates.'**
   String get indicativeRatesDisclaimer;
+
+  /// Display name for synthetic IRT (IRR ÷ 10)
+  ///
+  /// In en, this message translates to:
+  /// **'Iranian Toman'**
+  String get currencyIranianToman;
+
+  /// Localized display name for IRR
+  ///
+  /// In en, this message translates to:
+  /// **'Iranian Rial'**
+  String get currencyIranianRial;
 }
 
 class _AppLocalizationsDelegate

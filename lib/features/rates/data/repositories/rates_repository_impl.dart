@@ -7,6 +7,7 @@ import 'package:currency_converter/core/network/network_info.dart';
 import 'package:currency_converter/features/rates/data/datasources/local/rates_local_data_source.dart';
 import 'package:currency_converter/features/rates/data/datasources/remote/frankfurter_remote_data_source.dart';
 import 'package:currency_converter/features/rates/data/datasources/remote/oanor_irr_remote_data_source.dart';
+import 'package:currency_converter/features/rates/data/models/currency_model.dart';
 import 'package:currency_converter/features/rates/data/models/historical_series_model.dart';
 import 'package:currency_converter/features/rates/data/models/rate_snapshot_model.dart';
 import 'package:currency_converter/features/rates/data/utils/irr_rate_overlay.dart';
@@ -46,15 +47,29 @@ class RatesRepositoryImpl implements RatesRepository {
     required String base,
     List<String>? symbols,
   }) async {
+    final upperBase = base.toUpperCase();
+    // Frankfurter has no IRT — fetch USD (then overlay IRR and rebase to Toman).
+    final frankfurterBase =
+        upperBase == AppConstants.iranianTomanCode ? 'USD' : upperBase;
+
     if (await networkInfo.isConnected) {
       try {
         // Ensure USD is present when we need a triangular Oanor IRR bridge.
-        final requestSymbols = _symbolsForIrrBridge(base: base, symbols: symbols);
+        final requestSymbols = _symbolsForIrrBridge(
+          base: frankfurterBase,
+          symbols: symbols,
+        );
         final remote = await remoteDataSource.getLatestRates(
-          base: base,
+          base: frankfurterBase,
           symbols: requestSymbols,
         );
-        final overlayed = await _overlayLatestIrr(remote);
+        var overlayed = await _overlayLatestIrr(remote);
+        // Always derive IRT = IRR / 10 when a free-market IRR row exists.
+        overlayed = attachTomanFromRial(overlayed);
+        // User asked for Toman as base — rebase the whole snapshot to 1 IRT.
+        if (upperBase == AppConstants.iranianTomanCode) {
+          overlayed = rebaseSnapshotToIrt(overlayed);
+        }
         final now = DateTime.now();
         await localDataSource.cacheLatestRates(overlayed, now);
         return Right(overlayed.toDomain(fetchedAt: now));
@@ -87,7 +102,7 @@ class RatesRepositoryImpl implements RatesRepository {
     }
   }
 
-  /// Adds `USD` to [symbols] when the base is not USD/IRR and the caller
+  /// Adds `USD` to [symbols] when the base is not USD/IRR/IRT and the caller
   /// filtered the quote list — needed for `base → USD → IRR` triangulation.
   List<String>? _symbolsForIrrBridge({
     required String base,
@@ -95,7 +110,11 @@ class RatesRepositoryImpl implements RatesRepository {
   }) {
     if (symbols == null || symbols.isEmpty) return symbols;
     final upperBase = base.toUpperCase();
-    if (upperBase == 'USD' || upperBase == 'IRR') return symbols;
+    if (upperBase == 'USD' ||
+        upperBase == AppConstants.iranianRialCode ||
+        upperBase == AppConstants.iranianTomanCode) {
+      return symbols;
+    }
     if (symbols.map((s) => s.toUpperCase()).contains('USD')) return symbols;
     return [...symbols, 'USD'];
   }
@@ -159,59 +178,113 @@ class RatesRepositoryImpl implements RatesRepository {
     }
   }
 
-  /// Prefers Oanor history when either side of the pair is IRR and the
-  /// foreign leg is an Oanor-listed currency; otherwise uses Frankfurter.
+  /// Prefers Oanor/TGJU history when either side is IRR/IRT; maps IRT ↔ IRR
+  /// with the fixed ×10 rule before/after the network call.
   Future<HistoricalSeriesModel> _historicalWithIrrOverlay({
     required String base,
     required String quote,
     required DateTime start,
     required DateTime end,
   }) async {
-    final involvesIrr = base == 'IRR' || quote == 'IRR';
+    // IRT is synthetic — always fetch the IRR leg, then scale by 10.
+    final fetchBase =
+        base == AppConstants.iranianTomanCode ? AppConstants.iranianRialCode : base;
+    final fetchQuote =
+        quote == AppConstants.iranianTomanCode ? AppConstants.iranianRialCode : quote;
+
+    // Pure Rial ↔ Toman pair — no FX API needed (constant 10 or 0.1).
+    if (fetchBase == AppConstants.iranianRialCode &&
+        fetchQuote == AppConstants.iranianRialCode) {
+      return _rialTomanConstantSeries(
+        base: base,
+        quote: quote,
+        start: start,
+        end: end,
+      );
+    }
+
+    final involvesIrr = fetchBase == AppConstants.iranianRialCode ||
+        fetchQuote == AppConstants.iranianRialCode;
+
+    late final HistoricalSeriesModel fetched;
     if (!involvesIrr) {
-      return remoteDataSource.getHistoricalSeries(
-        base: base,
-        quote: quote,
+      fetched = await remoteDataSource.getHistoricalSeries(
+        base: fetchBase,
+        quote: fetchQuote,
         start: start,
         end: end,
       );
+    } else {
+      final foreign =
+          fetchBase == AppConstants.iranianRialCode ? fetchQuote : fetchBase;
+      final supported = AppConstants.oanorIrrForeignCodes.contains(foreign);
+      // Fall back to Frankfurter when Oanor does not list this foreign code.
+      if (!supported) {
+        fetched = await remoteDataSource.getHistoricalSeries(
+          base: fetchBase,
+          quote: fetchQuote,
+          start: start,
+          end: end,
+        );
+      } else {
+        try {
+          final daySpan = end.difference(start).inDays.abs() + 1;
+          final oanorHistory =
+              await oanorIrrRemoteDataSource.getForeignToIrrHistory(
+            foreignCode: foreign,
+            limit: daySpan,
+            start: start,
+            end: end,
+          );
+          fetched = overlayIrrOnHistory(
+            foreignToIrrHistory: oanorHistory,
+            base: fetchBase,
+            quote: fetchQuote,
+            invertToIrrBase: fetchBase == AppConstants.iranianRialCode,
+          );
+        } on ServerException {
+          // Soft-fail charts to Frankfurter if Oanor history is unavailable.
+          fetched = await remoteDataSource.getHistoricalSeries(
+            base: fetchBase,
+            quote: fetchQuote,
+            start: start,
+            end: end,
+          );
+        }
+      }
     }
 
-    final foreign = base == 'IRR' ? quote : base;
-    final supported = AppConstants.oanorIrrForeignCodes.contains(foreign);
-    // Fall back to Frankfurter when Oanor does not list this foreign code.
-    if (!supported) {
-      return remoteDataSource.getHistoricalSeries(
-        base: base,
-        quote: quote,
-        start: start,
-        end: end,
-      );
-    }
+    return scaleHistoryForToman(
+      series: fetched,
+      requestedBase: base,
+      requestedQuote: quote,
+      fetchedBase: fetchBase,
+      fetchedQuote: fetchQuote,
+    );
+  }
 
-    try {
-      final daySpan = end.difference(start).inDays.abs() + 1;
-      final oanorHistory = await oanorIrrRemoteDataSource.getForeignToIrrHistory(
-        foreignCode: foreign,
-        limit: daySpan,
-        start: start,
-        end: end,
-      );
-      return overlayIrrOnHistory(
-        foreignToIrrHistory: oanorHistory,
-        base: base,
-        quote: quote,
-        invertToIrrBase: base == 'IRR',
-      );
-    } on ServerException {
-      // Soft-fail charts to Frankfurter if Oanor history is unavailable.
-      return remoteDataSource.getHistoricalSeries(
-        base: base,
-        quote: quote,
-        start: start,
-        end: end,
-      );
-    }
+  /// Builds a flat IRR↔IRT series using the fixed 10 Rial = 1 Toman rule.
+  HistoricalSeriesModel _rialTomanConstantSeries({
+    required String base,
+    required String quote,
+    required DateTime start,
+    required DateTime end,
+  }) {
+    final rate = base == AppConstants.iranianTomanCode
+        ? AppConstants.rialPerToman.toDouble()
+        : 1.0 / AppConstants.rialPerToman;
+    final startStr = _fmt(start);
+    final endStr = _fmt(end);
+    return HistoricalSeriesModel(
+      base: base,
+      quote: quote,
+      startDate: startStr,
+      endDate: endStr,
+      datedRates: {
+        startStr: rate,
+        endStr: rate,
+      },
+    );
   }
 
   @override
@@ -219,12 +292,15 @@ class RatesRepositoryImpl implements RatesRepository {
     if (await networkInfo.isConnected) {
       try {
         final remote = await remoteDataSource.getSupportedCurrencies();
-        await localDataSource.cacheCurrencies(remote);
-        return Right(remote.map((m) => m.toDomain()).toList());
+        final withToman = _ensureTomanInCatalog(remote);
+        await localDataSource.cacheCurrencies(withToman);
+        return Right(withToman.map((m) => m.toDomain()).toList());
       } on ServerException catch (e) {
         final cached = await localDataSource.getCachedCurrencies();
         if (cached != null) {
-          return Right(cached.map((m) => m.toDomain()).toList());
+          return Right(
+            _ensureTomanInCatalog(cached).map((m) => m.toDomain()).toList(),
+          );
         }
         return Left(ServerFailure(e.message));
       }
@@ -233,12 +309,30 @@ class RatesRepositoryImpl implements RatesRepository {
     try {
       final cached = await localDataSource.getCachedCurrencies();
       if (cached != null) {
-        return Right(cached.map((m) => m.toDomain()).toList());
+        return Right(
+          _ensureTomanInCatalog(cached).map((m) => m.toDomain()).toList(),
+        );
       }
       return const Left(NetworkFailure());
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     }
+  }
+
+  /// Inserts synthetic IRT into the Frankfurter catalog when missing.
+  List<CurrencyModel> _ensureTomanInCatalog(List<CurrencyModel> catalog) {
+    final hasIrt = catalog.any(
+      (c) => c.code.toUpperCase() == AppConstants.iranianTomanCode,
+    );
+    if (hasIrt) return catalog;
+    final next = [
+      ...catalog,
+      const CurrencyModel(
+        code: AppConstants.iranianTomanCode,
+        name: 'Iranian Toman',
+      ),
+    ]..sort((a, b) => a.code.compareTo(b.code));
+    return next;
   }
 
   @override

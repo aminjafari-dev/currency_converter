@@ -162,4 +162,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get indicativeRatesDisclaimer =>
       'Rates are indicative reference values, not bank cash rates.';
+
+  @override
+  String get currencyIranianToman => 'Iranian Toman';
+
+  @override
+  String get currencyIranianRial => 'Iranian Rial';
 }
