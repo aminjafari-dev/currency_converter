@@ -23,7 +23,7 @@ Design source: Stitch export under `stitch_export/` (HTML + screenshots).
 - Flutter + `flutter_bloc` + `freezed`
 - Dartz `Either<Failure, T>`
 - GetIt feature DI
-- Dio → Frankfurter v1 (`api.frankfurter.dev`)
+- Dio → Frankfurter v2 (`api.frankfurter.dev`)
 - SharedPreferences cache
 - `fl_chart`, `country_flags`, `gap`, `google_fonts`
 - l10n: English + Persian (`fa`) with RTL

@@ -275,7 +275,7 @@ Never call network on every keystroke; debounce amount input; cache aggressively
 - [ ] Amounts convert using cached latest rates; timestamp visible
 - [ ] Named routes only; Clean Architecture layers respected
 - [ ] Theme/tokens centralized; strings localized
-- [ ] Rates provider behind repository (Frankfurter v1)
+- [ ] Rates provider behind repository (Frankfurter v2)
 - [ ] Widget design either implemented or domain-ready with clear next step
 
 ---

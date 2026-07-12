@@ -5,7 +5,10 @@ import 'package:dio/dio.dart';
 /// Register once in the locator and inject into feature data sources.
 /// Example:
 /// ```dart
-/// final response = await apiClient.get('/v1/latest', queryParameters: {'base': 'USD'});
+/// final response = await apiClient.get(
+///   '/v2/rates',
+///   queryParameters: {'base': 'USD'},
+/// );
 /// ```
 class ApiClient {
   /// Underlying Dio instance (configured with Frankfurter base URL).
@@ -17,7 +20,8 @@ class ApiClient {
               BaseOptions(
                 baseUrl: 'https://api.frankfurter.dev',
                 connectTimeout: const Duration(seconds: 15),
-                receiveTimeout: const Duration(seconds: 20),
+                // Long chart ranges (e.g. ALL) can return large v2 row lists.
+                receiveTimeout: const Duration(seconds: 45),
                 headers: const {
                   'Accept': 'application/json',
                 },

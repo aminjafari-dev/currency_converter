@@ -15,7 +15,7 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
   - `repositories/rates_repository.dart` — domain contract
   - `usecases/` — `GetLatestRates`, `GetHistoricalSeries`, `GetSupportedCurrencies`, `ConvertAmount`, selection use cases, `RefreshRates`
 - **Data**
-  - `datasources/remote/frankfurter_remote_data_source.dart` — Frankfurter v1 HTTP
+  - `datasources/remote/frankfurter_remote_data_source.dart` — Frankfurter v2 HTTP
   - `datasources/local/rates_local_data_source.dart` — SharedPreferences cache
   - `models/` — DTOs with `toDomain()`
   - `repositories/rates_repository_impl.dart` — cache-first / offline fallback
@@ -57,7 +57,7 @@ The **rates** feature is the shared FX engine for Orbit. It fetches indicative r
 - Clean Architecture + feature-first
 - `flutter_bloc` + `freezed`
 - Dartz `Either<Failure, T>`
-- Dio + Frankfurter v1
+- Dio + Frankfurter v2 (~165 active currencies)
 - SharedPreferences cache
 - GetIt feature DI
 - `SliverReorderableList` for Home list edit mode

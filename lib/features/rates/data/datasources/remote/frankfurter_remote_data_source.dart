@@ -6,7 +6,7 @@ import 'package:currency_converter/features/rates/data/models/currency_model.dar
 import 'package:currency_converter/features/rates/data/models/historical_series_model.dart';
 import 'package:currency_converter/features/rates/data/models/rate_snapshot_model.dart';
 
-/// Remote contract for Frankfurter FX endpoints (v1 API).
+/// Remote contract for Frankfurter FX endpoints (v2 API).
 ///
 /// Example:
 /// ```dart
@@ -30,10 +30,11 @@ abstract class RatesRemoteDataSource {
 
 /// Frankfurter implementation of [RatesRemoteDataSource].
 ///
-/// Uses the stable v1 API:
-/// - `GET /v1/latest`
-/// - `GET /v1/{start}..{end}`
-/// - `GET /v1/currencies`
+/// Uses the v2 API (≈165 active currencies from 84 central banks):
+/// - `GET /v2/rates?base=&quotes=` — latest (or historical with `from`/`to`)
+/// - `GET /v2/currencies` — active currency catalog
+///
+/// v1 was ECB-only (~30 codes) and omitted IRR, AMD, OMR, etc.
 class FrankfurterRemoteDataSource implements RatesRemoteDataSource {
   final ApiClient apiClient;
 
@@ -51,14 +52,13 @@ class FrankfurterRemoteDataSource implements RatesRemoteDataSource {
   }) async {
     try {
       final query = <String, dynamic>{'base': base};
-      // Only send symbols when the caller wants a subset.
+      // v2 uses `quotes` (not v1's `symbols`) to filter target currencies.
       if (symbols != null && symbols.isNotEmpty) {
-        query['symbols'] = symbols.join(',');
+        query['quotes'] = symbols.join(',');
       }
-      final response = await apiClient.get('/v1/latest', queryParameters: query);
-      return RateSnapshotModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      final response = await apiClient.get('/v2/rates', queryParameters: query);
+      final rows = response.data as List<dynamic>;
+      return RateSnapshotModel.fromV2List(rows);
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to fetch latest rates');
     } catch (e) {
@@ -74,17 +74,25 @@ class FrankfurterRemoteDataSource implements RatesRemoteDataSource {
     required DateTime end,
   }) async {
     try {
-      final path = '/v1/${_fmt(start)}..${_fmt(end)}';
+      final startStr = _fmt(start);
+      final endStr = _fmt(end);
+      // Same `/v2/rates` resource; `from`/`to` unlock the time-series mode.
       final response = await apiClient.get(
-        path,
+        '/v2/rates',
         queryParameters: {
           'base': base,
-          'symbols': quote,
+          'quotes': quote,
+          'from': startStr,
+          'to': endStr,
         },
       );
-      return HistoricalSeriesModel.fromJson(
-        response.data as Map<String, dynamic>,
+      final rows = response.data as List<dynamic>;
+      return HistoricalSeriesModel.fromV2List(
+        rows,
+        base: base,
         quote: quote,
+        startDate: startStr,
+        endDate: endStr,
       );
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to fetch historical rates');
@@ -96,9 +104,10 @@ class FrankfurterRemoteDataSource implements RatesRemoteDataSource {
   @override
   Future<List<CurrencyModel>> getSupportedCurrencies() async {
     try {
-      final response = await apiClient.get('/v1/currencies');
-      final map = response.data as Map<String, dynamic>;
-      return CurrencyModel.listFromCurrenciesMap(map);
+      // Default scope is active currencies (~165). Pass `scope=all` for archived.
+      final response = await apiClient.get('/v2/currencies');
+      final list = response.data as List<dynamic>;
+      return CurrencyModel.listFromV2List(list);
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to fetch currencies');
     } catch (e) {

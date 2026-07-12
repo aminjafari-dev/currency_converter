@@ -104,21 +104,23 @@ You can integrate rates in several architectural ways. These are independent of 
 |--|--|
 | **URL** | [https://frankfurter.dev](https://frankfurter.dev) |
 | **Cost** | Free, no API key |
-| **Data** | Central banks / official sources, ~200 currencies, long history |
-| **Update** | Typically **daily** reference rates |
+| **Data** | 84 central banks / official sources, **201 currencies** (165 active + 36 archived), history back to 1948 |
+| **Update** | Typically **daily** reference rates (blended by default; filter with `providers`) |
 | **Limits** | Abuse rate limits; no monthly cap |
 | **Commercial** | Generally allowed (check underlying provider terms) |
 | **Self-host** | Yes (open source) |
 
-**Good for:** MVP, charts (historical), offline cache, learning Clean Architecture plumbing.  
+> **v1 vs v2:** Orbit uses **v2**. v1 is ECB-only (~30 codes) and omits IRR, AMD, OMR, etc. The website currency catalog documents the v2 dataset.
+
+**Good for:** MVP, charts (historical), offline cache, learning Clean Architecture plumbing, broad ISO coverage (IRR/AMD/OMR/YER…).  
 **Weak for:** “Live rate every 60 seconds”, second-level trading accuracy.
 
-**Endpoints you care about conceptually:**
+**Endpoints you care about (v2):**
 
-- Latest rates (base + symbols)
-- Historical by date
-- Time series between two dates
-- Currency list
+- Latest rates: `GET /v2/rates?base=&quotes=`
+- Historical / time series: `GET /v2/rates?base=&quotes=&from=&to=`
+- Single pair: `GET /v2/rate/{base}/{quote}`
+- Currency list: `GET /v2/currencies` (`scope=all` includes archived)
 
 ---
 
@@ -447,7 +449,7 @@ One upstream “latest” call per TTL can feed **all** conversions for every cu
 3. Prefer multi-source blended providers for display stability.  
 4. For charts, use the **same provider** for latest and history when possible (avoids jumps).  
 5. Document timezone of “daily” rates (often 14:15 CET for ECB-style data).  
-6. Handle missing currencies (IRR, AMD, etc. appear in your Add Currency design — verify coverage).  
+6. Prefer **Frankfurter v2** for broad ISO coverage (IRR, AMD, OMR, YER, …). v1 is ECB-only and will look “incomplete” next to the website catalog.  
 7. Rounding: define decimal rules per currency (JPY = 0 decimals, etc.).  
 
 ---
