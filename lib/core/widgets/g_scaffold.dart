@@ -7,9 +7,13 @@ import 'package:currency_converter/core/theme/app_colors.dart';
 /// Example:
 /// ```dart
 /// return GScaffold(
+///   extendBody: true,
 ///   appBar: AppBar(title: GText(l10n.appName)),
 ///   body: child,
-///   bottomNavigationBar: const NerkhakBottomNav(currentIndex: 0),
+///   bottomNavigationBar: NerkhakBottomNav(
+///     currentIndex: index,
+///     onTap: (i) => setState(() => index = i),
+///   ),
 /// );
 /// ```
 class GScaffold extends StatelessWidget {

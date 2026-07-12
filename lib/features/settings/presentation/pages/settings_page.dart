@@ -9,9 +9,10 @@ import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/widgets/nerkhak_bottom_nav.dart';
 
 /// Minimal Settings placeholder with language switcher (en / fa).
+///
+/// Hosted inside [MainShellPage]; the shell owns the bottom navigation bar.
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -26,7 +27,6 @@ class SettingsPage extends StatelessWidget {
           style: AppTextStyles.headlineMd(weight: FontWeight.w700),
         ),
       ),
-      bottomNavigationBar: const NerkhakBottomNav(currentIndex: 2),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.containerMargin),
         child: Column(

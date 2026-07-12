@@ -1,121 +1,100 @@
+import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:currency_converter/core/router/page_name.dart';
-import 'package:currency_converter/core/router/route_args.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
+import 'package:currency_converter/l10n/app_localizations.dart';
 
-/// Shared Nerkhak bottom navigation matching the Stitch design.
+/// Persistent notch bottom bar for [MainShellPage].
 ///
-/// Indexes: 0 = Convert (Home), 1 = Chart (Detail entry), 2 = Settings.
+/// Does **not** navigate — the shell switches an [IndexedStack] via [onTap]
+/// so this widget stays mounted across tab changes.
+///
+/// Indexes: 0 = Convert, 1 = Chart, 2 = Settings.
 ///
 /// Example:
 /// ```dart
-/// bottomNavigationBar: NerkhakBottomNav(currentIndex: 0);
+/// NerkhakBottomNav(
+///   currentIndex: tabIndex,
+///   onTap: (i) => setState(() => tabIndex = i),
+/// );
 /// ```
-class NerkhakBottomNav extends StatelessWidget {
+class NerkhakBottomNav extends StatefulWidget {
   final int currentIndex;
 
-  /// Optional currency code used when tapping the Chart tab.
-  final String? chartCurrencyCode;
-  final String? chartBaseCode;
+  /// Called when the user selects a tab. Host should update [currentIndex].
+  final ValueChanged<int> onTap;
 
   const NerkhakBottomNav({
     super.key,
     required this.currentIndex,
-    this.chartCurrencyCode,
-    this.chartBaseCode,
+    required this.onTap,
   });
 
-  void _onTap(BuildContext context, int index) {
-    if (index == currentIndex && index != 1) return;
+  @override
+  State<NerkhakBottomNav> createState() => _NerkhakBottomNavState();
+}
 
-    switch (index) {
-      case 0:
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          PageName.home,
-          (route) => false,
-        );
-      case 1:
-        final code = chartCurrencyCode ?? 'EUR';
-        final base = chartBaseCode ?? 'USD';
-        Navigator.of(context).pushNamed(
-          PageName.currencyDetail,
-          arguments: CurrencyDetailArgs(code: code, baseCode: base),
-        );
-      case 2:
-        Navigator.of(context).pushNamed(PageName.settings);
+class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
+  late final NotchBottomBarController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = NotchBottomBarController(index: widget.currentIndex);
+  }
+
+  @override
+  void didUpdateWidget(covariant NerkhakBottomNav oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Animate the notch when the shell updates the selected tab index.
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _controller.jumpTo(widget.currentIndex);
     }
   }
 
-  Widget _item({
-    required BuildContext context,
-    required int index,
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  BottomBarItem _item({
     required IconData icon,
-    required bool filled,
+    required String label,
   }) {
-    final selected = currentIndex == index;
-    return GestureDetector(
-      onTap: () => _onTap(context, index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primaryFixed : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: selected ? AppColors.onPrimaryFixed : AppColors.onSurfaceVariant,
-          size: 24,
-        ),
-      ),
+    return BottomBarItem(
+      inActiveItem: Icon(icon, color: AppColors.onSurfaceVariant),
+      activeItem: Icon(icon, color: AppColors.onPrimaryFixed),
+      itemLabel: label,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        border: Border(
-          top: BorderSide(color: AppColors.surfaceContainerHighest),
-        ),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusXl),
-        ),
+    final l10n = AppLocalizations.of(context);
+
+    return AnimatedNotchBottomBar(
+      notchBottomBarController: _controller,
+      color: AppColors.surfaceContainerLowest,
+      notchColor: AppColors.primaryFixed,
+      kIconSize: 24,
+      kBottomRadius: AppSpacing.radiusXl,
+      showLabel: true,
+      showShadow: false,
+      removeMargins: false,
+      durationInMilliSeconds: 300,
+      elevation: 0,
+      itemLabelStyle: const TextStyle(
+        color: AppColors.onSurfaceVariant,
+        fontSize: 10,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _item(
-              context: context,
-              index: 0,
-              icon: Icons.sync_alt,
-              filled: true,
-            ),
-            _item(
-              context: context,
-              index: 1,
-              icon: Icons.show_chart,
-              filled: false,
-            ),
-            _item(
-              context: context,
-              index: 2,
-              icon: Icons.settings,
-              filled: false,
-            ),
-          ],
-        ),
-      ),
+      bottomBarItems: [
+        _item(icon: Icons.sync_alt, label: l10n.navConvert),
+        _item(icon: Icons.show_chart, label: l10n.navChart),
+        _item(icon: Icons.settings, label: l10n.navSettings),
+      ],
+      onTap: widget.onTap,
     );
   }
 }

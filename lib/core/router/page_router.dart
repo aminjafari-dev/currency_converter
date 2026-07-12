@@ -4,10 +4,12 @@ import 'package:currency_converter/core/router/page_name.dart';
 import 'package:currency_converter/core/router/route_args.dart';
 import 'package:currency_converter/features/currency_catalog/presentation/pages/add_currency_page.dart';
 import 'package:currency_converter/features/currency_detail/presentation/pages/currency_detail_page.dart';
-import 'package:currency_converter/features/rates/presentation/pages/home_page.dart';
-import 'package:currency_converter/features/settings/presentation/pages/settings_page.dart';
+import 'package:currency_converter/features/main_shell/presentation/pages/main_shell_page.dart';
 
 /// Central named-route table for Nerkhak.
+///
+/// Tab screens (Convert / Chart / Settings) live inside [MainShellPage] so the
+/// bottom nav is not rebuilt on tab change. Only pushed flows use extra routes.
 ///
 /// Example:
 /// ```dart
@@ -15,9 +17,10 @@ import 'package:currency_converter/features/settings/presentation/pages/settings
 /// ```
 abstract final class PageRouter {
   static Map<String, WidgetBuilder> routes = {
-    PageName.home: (_) => const HomePage(),
+    // Shell owns IndexedStack tabs + persistent bottom navigation.
+    PageName.home: (_) => const MainShellPage(),
     PageName.addCurrency: (_) => const AddCurrencyPage(),
-    PageName.settings: (_) => const SettingsPage(),
+    // Optional deep-link / standalone chart (outside the shell tabs).
     PageName.currencyDetail: (context) {
       final args = ModalRoute.of(context)?.settings.arguments;
       final detailArgs = args is CurrencyDetailArgs

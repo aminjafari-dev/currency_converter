@@ -13,7 +13,6 @@ import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/widgets/nerkhak_bottom_nav.dart';
 import 'package:currency_converter/core/locator.dart';
 import 'package:currency_converter/features/rates/domain/entities/currency.dart';
 import 'package:currency_converter/features/rates/domain/entities/selected_currency.dart';
@@ -28,15 +27,25 @@ import 'package:currency_converter/features/rates/presentation/widgets/currency_
 /// Tap the pen icon to enter edit mode — each card shows remove + drag handles.
 /// Swipe a row (outside edit mode) to remove it. Long-press sets the base.
 ///
+/// When [embedded] is true, a parent (e.g. [MainShellPage]) already provides
+/// [HomeBloc] — do not create another provider.
+///
 /// Example:
 /// ```dart
-/// Navigator.pushNamed(context, PageName.home);
+/// // Standalone route
+/// const HomePage();
+/// // Inside MainShellPage IndexedStack
+/// const HomePage(embedded: true);
 /// ```
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  /// When true, reuse an ancestor [HomeBloc] instead of creating one.
+  final bool embedded;
+
+  const HomePage({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
+    if (embedded) return const _HomeView();
     return BlocProvider(
       create: (_) => locator<HomeBloc>()..add(const HomeEvent.started()),
       child: const _HomeView(),
@@ -121,26 +130,6 @@ class _HomeView extends StatelessWidget {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          final load = state.load;
-          String? chartCode;
-          String? baseCode;
-          if (load is HomeLoadCompleted) {
-            baseCode = load.selected
-                .firstWhere((c) => c.isBase, orElse: () => load.selected.first)
-                .code;
-            chartCode = load.selected
-                .firstWhere((c) => !c.isBase, orElse: () => load.selected.first)
-                .code;
-          }
-          return NerkhakBottomNav(
-            currentIndex: 0,
-            chartCurrencyCode: chartCode,
-            chartBaseCode: baseCode,
-          );
-        },
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {

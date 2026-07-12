@@ -14,23 +14,47 @@ import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/widgets/nerkhak_bottom_nav.dart';
 import 'package:currency_converter/features/currency_detail/domain/entities/range_option.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_bloc.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_event.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_state.dart';
 
 /// Currency Detail & Chart screen matching Stitch `02_currency_detail_chart`.
+///
+/// When [embedded] is true, a parent (e.g. [MainShellPage]) already provides
+/// [DetailBloc] — do not create another provider or require [args].
+///
+/// Example:
+/// ```dart
+/// CurrencyDetailPage(args: CurrencyDetailArgs(code: 'EUR', baseCode: 'USD'));
+/// const CurrencyDetailPage(embedded: true);
+/// ```
 class CurrencyDetailPage extends StatelessWidget {
-  final CurrencyDetailArgs args;
+  final CurrencyDetailArgs? args;
 
-  const CurrencyDetailPage({super.key, required this.args});
+  /// When true, reuse an ancestor [DetailBloc] instead of creating one.
+  final bool embedded;
+
+  const CurrencyDetailPage({
+    super.key,
+    this.args,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (embedded) return const _DetailView();
+
+    final detailArgs =
+        args ?? const CurrencyDetailArgs(code: 'EUR', baseCode: 'USD');
     return BlocProvider(
       create: (_) => locator<DetailBloc>()
-        ..add(DetailEvent.started(code: args.code, baseCode: args.baseCode)),
+        ..add(
+          DetailEvent.started(
+            code: detailArgs.code,
+            baseCode: detailArgs.baseCode,
+          ),
+        ),
       child: const _DetailView(),
     );
   }
@@ -61,18 +85,6 @@ class _DetailView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return GScaffold(
-      bottomNavigationBar: BlocBuilder<DetailBloc, DetailState>(
-        builder: (context, state) {
-          final load = state.load;
-          return NerkhakBottomNav(
-            currentIndex: 1,
-            chartCurrencyCode:
-                load is DetailLoadCompleted ? load.code : null,
-            chartBaseCode:
-                load is DetailLoadCompleted ? load.baseCode : null,
-          );
-        },
-      ),
       body: BlocBuilder<DetailBloc, DetailState>(
         builder: (context, state) {
           return state.load.when(
