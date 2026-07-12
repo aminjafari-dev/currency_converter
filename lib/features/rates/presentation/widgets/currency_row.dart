@@ -178,6 +178,9 @@ class _CurrencyRowState extends State<CurrencyRow> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Persian (`fa`) is RTL — keep amounts physically left-aligned so rates
+    // hug the outer edge instead of sitting toward the row center.
+    final isPersian = Localizations.localeOf(context).languageCode == 'fa';
     // Green border only while this row's amount field is focused (not in edit mode).
     // Useful so tapping EUR clears the highlight from USD immediately.
     final isHighlighted = !widget.isEditing && _hasFocus;
@@ -273,30 +276,37 @@ class _CurrencyRowState extends State<CurrencyRow> {
               else
                 SizedBox(
                   width: _amountFieldWidth,
-                  child: TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    textAlign: TextAlign.right,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                  // Force LTR digit order; align left in Persian so amounts
+                  // stick to the physical left edge of the amount column.
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      textAlign:
+                          isPersian ? TextAlign.left : TextAlign.right,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      ],
+                      // Scale numeralXl down when the typed/converted value no longer
+                      // fits at 40px — keeps short amounts bold and long ones readable.
+                      style:
+                          AppTextStyles.numeralXl(color: amountColor).copyWith(
+                        fontSize: amountFontSize,
+                        height: 1.2,
+                        letterSpacing: -0.04 * amountFontSize,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        filled: false,
+                      ),
+                      onChanged: widget.onAmountChanged,
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                    ],
-                    // Scale numeralXl down when the typed/converted value no longer
-                    // fits at 40px — keeps short amounts bold and long ones readable.
-                    style: AppTextStyles.numeralXl(color: amountColor).copyWith(
-                      fontSize: amountFontSize,
-                      height: 1.2,
-                      letterSpacing: -0.04 * amountFontSize,
-                    ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      filled: false,
-                    ),
-                    onChanged: widget.onAmountChanged,
                   ),
                 ),
             ],
