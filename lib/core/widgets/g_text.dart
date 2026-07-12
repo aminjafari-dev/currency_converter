@@ -38,7 +38,7 @@ class GText extends StatelessWidget {
 
     return Text(
       data,
-      // Remap Inter → Far Homa for `fa` without callers changing every screen.
+      // Remap Nunito → Far Homa for `fa` without callers changing every screen.
       style: AppTextStyles.localize(base, locale),
       textAlign: textAlign,
       maxLines: maxLines,

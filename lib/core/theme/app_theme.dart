@@ -21,7 +21,7 @@ abstract final class AppTheme {
   ///
   /// When [locale] is Persian, [ThemeData.fontFamily] and the text theme use
   /// Far Homa so Material defaults (AppBar, SnackBar, Input hints) match
-  /// Iranian UI copy. Latin locales keep Inter via Google Fonts.
+  /// Iranian UI copy. Latin locales keep Nunito via Google Fonts.
   static ThemeData dark({Locale? locale}) {
     final isPersian = AppFonts.isPersian(locale);
 
@@ -62,7 +62,7 @@ abstract final class AppTheme {
             bodyColor: AppColors.onSurface,
             displayColor: AppColors.onSurface,
           )
-        : GoogleFonts.interTextTheme(base.textTheme).apply(
+        : GoogleFonts.nunitoTextTheme(base.textTheme).apply(
             bodyColor: AppColors.onSurface,
             displayColor: AppColors.onSurface,
           );

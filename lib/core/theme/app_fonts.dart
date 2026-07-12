@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Font family tokens for Nerkhak.
 ///
-/// Latin UI uses Google Fonts (Inter / JetBrains Mono). Persian (`fa`) UI copy
+/// Latin UI uses Google Fonts (Nunito / JetBrains Mono). Persian (`fa`) UI copy
 /// uses the bundled Far Homa face from `assets/font/Far_Homa/`.
 ///
 /// Example:
@@ -19,9 +19,9 @@ abstract final class AppFonts {
   static bool isPersian(Locale? locale) => locale?.languageCode == 'fa';
 
   /// Returns Far Homa for Persian locales; otherwise `null` so callers keep
-  /// their Latin Google Fonts family.
+  /// their Latin Google Fonts family (Nunito).
   ///
-  /// Example: `GoogleFonts.inter(...).copyWith(fontFamily: AppFonts.uiFamily(locale))`
+  /// Example: `GoogleFonts.nunito(...).copyWith(fontFamily: AppFonts.uiFamily(locale))`
   static String? uiFamily(Locale? locale) =>
       isPersian(locale) ? farHoma : null;
 }

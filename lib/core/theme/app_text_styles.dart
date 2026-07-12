@@ -6,7 +6,7 @@ import 'package:currency_converter/core/theme/app_fonts.dart';
 
 /// Typography tokens from the Stitch Nerkhak design system.
 ///
-/// Inter is used for Latin UI copy; JetBrains Mono for rates/numerals.
+/// Nunito is used for Latin UI copy; JetBrains Mono for rates/numerals.
 /// When the locale is Persian (`fa`), UI copy styles resolve to Far Homa via
 /// [localize] / [GText] — numerals stay mono so amounts stay aligned.
 ///
@@ -19,7 +19,7 @@ import 'package:currency_converter/core/theme/app_fonts.dart';
 /// ```
 abstract final class AppTextStyles {
   /// Large brand / page title (32 / 40, weight 600).
-  static TextStyle headlineLg({Color? color}) => GoogleFonts.inter(
+  static TextStyle headlineLg({Color? color}) => GoogleFonts.nunito(
         fontSize: 32,
         height: 40 / 32,
         fontWeight: FontWeight.w600,
@@ -28,7 +28,7 @@ abstract final class AppTextStyles {
       );
 
   /// Mobile page title (24 / 32, weight 600).
-  static TextStyle headlineLgMobile({Color? color}) => GoogleFonts.inter(
+  static TextStyle headlineLgMobile({Color? color}) => GoogleFonts.nunito(
         fontSize: 24,
         height: 32 / 24,
         fontWeight: FontWeight.w600,
@@ -38,7 +38,7 @@ abstract final class AppTextStyles {
 
   /// Section / currency code title (20 / 28, weight 500).
   static TextStyle headlineMd({Color? color, FontWeight? weight}) =>
-      GoogleFonts.inter(
+      GoogleFonts.nunito(
         fontSize: 20,
         height: 28 / 20,
         fontWeight: weight ?? FontWeight.w500,
@@ -46,7 +46,7 @@ abstract final class AppTextStyles {
       );
 
   /// Body large (18 / 26).
-  static TextStyle bodyLg({Color? color}) => GoogleFonts.inter(
+  static TextStyle bodyLg({Color? color}) => GoogleFonts.nunito(
         fontSize: 18,
         height: 26 / 18,
         fontWeight: FontWeight.w400,
@@ -54,7 +54,7 @@ abstract final class AppTextStyles {
       );
 
   /// Body medium (16 / 24).
-  static TextStyle bodyMd({Color? color}) => GoogleFonts.inter(
+  static TextStyle bodyMd({Color? color}) => GoogleFonts.nunito(
         fontSize: 16,
         height: 24 / 16,
         fontWeight: FontWeight.w400,
@@ -62,7 +62,7 @@ abstract final class AppTextStyles {
       );
 
   /// Small uppercase labels (12 / 16, weight 600).
-  static TextStyle labelSm({Color? color}) => GoogleFonts.inter(
+  static TextStyle labelSm({Color? color}) => GoogleFonts.nunito(
         fontSize: 12,
         height: 16 / 12,
         fontWeight: FontWeight.w600,
@@ -107,7 +107,7 @@ abstract final class AppTextStyles {
 
     return style.copyWith(
       fontFamily: AppFonts.farHoma,
-      // Far Homa is a single face — drop Inter's tight tracking for RTL copy.
+      // Far Homa is a single face — drop Nunito's tight tracking for RTL copy.
       letterSpacing: 0,
       fontFamilyFallback: const <String>[],
     );
