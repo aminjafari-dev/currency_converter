@@ -2,7 +2,7 @@
 
 ## Description
 
-The **currency_detail** feature powers the Currency Detail & Chart screen: live rate header, conversion line, % change, lime `fl_chart` series, range chips (1D–ALL), High/Low/% stats, and an Orbit Insight card. Historical stats are computed client-side from Frankfurter series because the API does not return them.
+The **currency_detail** feature powers the Currency Detail & Chart screen: live rate header, conversion line, % change, lime `fl_chart` series, range chips (1D–ALL), High/Low/% stats, and an Nerkhak Insight card. Historical stats are computed client-side from Frankfurter series because the API does not return them.
 
 ## Architecture
 

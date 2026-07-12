@@ -1,11 +1,11 @@
 {
-    "name": "currency_converter",
-    "short_name": "currency_converter",
+    "name": "Nerkhak",
+    "short_name": "Nerkhak",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Nerkhak — modern currency converter.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -1,6 +1,6 @@
 {
   "@@locale": "fa",
-  "appName": "اوربیت",
+  "appName": "نرخک",
   "addCurrencyTitle": "افزودن ارز",
   "searchCurrencyHint": "جستجوی ارز یا کشور",
   "popularSection": "محبوب",
@@ -21,8 +21,8 @@
   "statHigh": "بیشینه",
   "statLow": "کمینه",
   "statPercentChange": "درصد تغییر",
-  "orbitInsightTitle": "بینش اوربیت",
-  "orbitInsightBody": "{currency} در برابر پایه انتخاب‌شده فعال است. نرخ‌های مرجع روزانه از منابع رسمی به‌روز می‌شوند.",
+  "nerkhakInsightTitle": "بینش نرخک",
+  "nerkhakInsightBody": "{currency} در برابر پایه انتخاب‌شده فعال است. نرخ‌های مرجع روزانه از منابع رسمی به‌روز می‌شوند.",
   "settingsTitle": "تنظیمات",
   "settingsLanguage": "زبان",
   "settingsEnglish": "انگلیسی",

@@ -5,22 +5,22 @@ import 'package:currency_converter/core/router/route_args.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 
-/// Shared Orbit bottom navigation matching the Stitch design.
+/// Shared Nerkhak bottom navigation matching the Stitch design.
 ///
 /// Indexes: 0 = Convert (Home), 1 = Chart (Detail entry), 2 = Settings.
 ///
 /// Example:
 /// ```dart
-/// bottomNavigationBar: OrbitBottomNav(currentIndex: 0);
+/// bottomNavigationBar: NerkhakBottomNav(currentIndex: 0);
 /// ```
-class OrbitBottomNav extends StatelessWidget {
+class NerkhakBottomNav extends StatelessWidget {
   final int currentIndex;
 
   /// Optional currency code used when tapping the Chart tab.
   final String? chartCurrencyCode;
   final String? chartBaseCode;
 
-  const OrbitBottomNav({
+  const NerkhakBottomNav({
     super.key,
     required this.currentIndex,
     this.chartCurrencyCode,

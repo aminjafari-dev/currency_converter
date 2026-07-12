@@ -1,4 +1,4 @@
-# Currency Rate APIs — Complete Guide for Flux / Kinetic / Orbit
+# Currency Rate APIs — Complete Guide for Flux / Kinetic / Nerkhak
 
 This document lists **all practical ways** to get currency exchange rates for a Flutter currency converter app (list, detail + chart, add currency, home widget). It covers free and paid options, what “accurate” means, and how to choose a provider for this project.
 
@@ -110,7 +110,7 @@ You can integrate rates in several architectural ways. These are independent of 
 | **Commercial** | Generally allowed (check underlying provider terms) |
 | **Self-host** | Yes (open source) |
 
-> **v1 vs v2:** Orbit uses **v2**. v1 is ECB-only (~30 codes) and omits IRR, AMD, OMR, etc. The website currency catalog documents the v2 dataset.
+> **v1 vs v2:** Nerkhak uses **v2**. v1 is ECB-only (~30 codes) and omits IRR, AMD, OMR, etc. The website currency catalog documents the v2 dataset.
 
 **Good for:** MVP, charts (historical), offline cache, learning Clean Architecture plumbing, broad ISO coverage (IRR/AMD/OMR/YER…).  
 **Weak for:** “Live rate every 60 seconds”, second-level trading accuracy.
@@ -284,7 +284,7 @@ These are **market data** APIs that include FX among stocks/crypto.
 #### CurrencyFreaks / UniRateAPI (paid)
 
 - Fiat plus sometimes crypto / metals
-- Useful if Orbit later expands beyond fiat
+- Useful if Nerkhak later expands beyond fiat
 
 #### Abstract API / similar “currency” products
 
@@ -517,7 +517,7 @@ Need institutional streaming?
 | **Add Currency** | Full symbol metadata (code, name) | Popular / trending flags (your own logic) |
 | **Home Widget** | Latest + 24h change | Faster TTL via paid plan |
 
-**Orbit Insight** text on the detail screen is **not** provided by FX rate APIs — that needs news/LLM/content, or static/editorial copy.
+**Nerkhak Insight** text on the detail screen is **not** provided by FX rate APIs — that needs news/LLM/content, or static/editorial copy.
 
 ---
 

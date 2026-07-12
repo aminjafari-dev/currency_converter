@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// Brand name shown in the app bar and widget
   ///
   /// In en, this message translates to:
-  /// **'Orbit'**
+  /// **'Nerkhak'**
   String get appName;
 
   /// Title of the Add Currency screen
@@ -227,14 +227,14 @@ abstract class AppLocalizations {
   /// Title of the insight card on the detail screen
   ///
   /// In en, this message translates to:
-  /// **'Orbit Insight'**
-  String get orbitInsightTitle;
+  /// **'Nerkhak Insight'**
+  String get nerkhakInsightTitle;
 
   /// Static insight copy for v1
   ///
   /// In en, this message translates to:
   /// **'{currency} remains active against the selected base. Indicative reference rates are updated daily from official sources.'**
-  String orbitInsightBody(String currency);
+  String nerkhakInsightBody(String currency);
 
   /// Settings screen title
   ///

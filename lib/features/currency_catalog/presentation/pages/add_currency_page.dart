@@ -71,7 +71,11 @@ class _AddCurrencyView extends StatelessWidget {
                     .read<AddCurrencyBloc>()
                     .add(AddCurrencyEvent.searchChanged(query: q));
               },
-              style: AppTextStyles.bodyMd(),
+              // Far Homa when locale is `fa` so Persian search input matches UI copy.
+              style: AppTextStyles.localize(
+                AppTextStyles.bodyMd(),
+                Localizations.localeOf(context),
+              ),
               decoration: InputDecoration(
                 hintText: l10n.searchCurrencyHint,
                 prefixIcon: const Icon(

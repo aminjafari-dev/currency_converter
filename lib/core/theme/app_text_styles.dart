@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:currency_converter/core/theme/app_colors.dart';
+import 'package:currency_converter/core/theme/app_fonts.dart';
 
-/// Typography tokens from the Stitch Orbit design system.
+/// Typography tokens from the Stitch Nerkhak design system.
 ///
-/// Inter is used for UI copy; JetBrains Mono is used for rates/numerals.
+/// Inter is used for Latin UI copy; JetBrains Mono for rates/numerals.
+/// When the locale is Persian (`fa`), UI copy styles resolve to Far Homa via
+/// [localize] / [GText] — numerals stay mono so amounts stay aligned.
+///
 /// Prefer these helpers over ad-hoc [TextStyle] literals.
 ///
 /// Example:
 /// ```dart
 /// Text('1,240.00', style: AppTextStyles.numeralXl());
+/// GText(l10n.appName, style: AppTextStyles.headlineMd()); // Far Homa when fa
 /// ```
 abstract final class AppTextStyles {
   /// Large brand / page title (32 / 40, weight 600).
@@ -81,4 +86,36 @@ abstract final class AppTextStyles {
         fontWeight: FontWeight.w500,
         color: color ?? AppColors.onSurface,
       );
+
+  /// Swaps Latin UI fonts to Far Homa when [locale] is Persian.
+  ///
+  /// Mono numeral styles are left unchanged so rate amounts keep tabular
+  /// alignment. Call from [GText] (or any widget that has a [BuildContext]).
+  ///
+  /// Example:
+  /// ```dart
+  /// final style = AppTextStyles.localize(
+  ///   AppTextStyles.bodyMd(),
+  ///   Localizations.localeOf(context),
+  /// );
+  /// ```
+  static TextStyle localize(TextStyle style, Locale? locale) {
+    // Persian UI copy → Far Homa; keep JetBrains Mono for rates/amounts.
+    if (!AppFonts.isPersian(locale) || _isMonoNumeral(style)) {
+      return style;
+    }
+
+    return style.copyWith(
+      fontFamily: AppFonts.farHoma,
+      // Far Homa is a single face — drop Inter's tight tracking for RTL copy.
+      letterSpacing: 0,
+      fontFamilyFallback: const <String>[],
+    );
+  }
+
+  /// True when [style] is a JetBrains Mono numeral token (not Iranian UI copy).
+  static bool _isMonoNumeral(TextStyle style) {
+    final family = style.fontFamily?.toLowerCase() ?? '';
+    return family.contains('jet') || family.contains('mono');
+  }
 }

@@ -9,7 +9,7 @@ import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/widgets/orbit_bottom_nav.dart';
+import 'package:currency_converter/core/widgets/nerkhak_bottom_nav.dart';
 
 /// Minimal Settings placeholder with language switcher (en / fa).
 class SettingsPage extends StatelessWidget {
@@ -26,7 +26,7 @@ class SettingsPage extends StatelessWidget {
           style: AppTextStyles.headlineMd(weight: FontWeight.w700),
         ),
       ),
-      bottomNavigationBar: const OrbitBottomNav(currentIndex: 2),
+      bottomNavigationBar: const NerkhakBottomNav(currentIndex: 2),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.containerMargin),
         child: Column(

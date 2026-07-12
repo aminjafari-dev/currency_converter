@@ -1,4 +1,4 @@
-/// Spacing scale from the Stitch Orbit export.
+/// Spacing scale from the Stitch Nerkhak export.
 ///
 /// Prefer these constants (and [GGap]) instead of magic numbers.
 ///

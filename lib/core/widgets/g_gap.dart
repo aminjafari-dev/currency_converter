@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 
 import 'package:currency_converter/core/theme/app_spacing.dart';
 
-/// Shared Gap wrappers matching the Orbit spacing scale.
+/// Shared Gap wrappers matching the Nerkhak spacing scale.
 ///
 /// Use these instead of [SizedBox] / raw [Gap] with magic numbers.
 ///

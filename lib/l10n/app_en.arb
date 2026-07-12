@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appName": "Orbit",
+  "appName": "Nerkhak",
   "@appName": {
     "description": "Brand name shown in the app bar and widget"
   },
@@ -85,12 +85,12 @@
   "statHigh": "High",
   "statLow": "Low",
   "statPercentChange": "% Change",
-  "orbitInsightTitle": "Orbit Insight",
-  "@orbitInsightTitle": {
+  "nerkhakInsightTitle": "Nerkhak Insight",
+  "@nerkhakInsightTitle": {
     "description": "Title of the insight card on the detail screen"
   },
-  "orbitInsightBody": "{currency} remains active against the selected base. Indicative reference rates are updated daily from official sources.",
-  "@orbitInsightBody": {
+  "nerkhakInsightBody": "{currency} remains active against the selected base. Indicative reference rates are updated daily from official sources.",
+  "@nerkhakInsightBody": {
     "description": "Static insight copy for v1",
     "placeholders": {
       "currency": {

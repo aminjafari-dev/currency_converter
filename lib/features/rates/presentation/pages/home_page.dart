@@ -13,7 +13,7 @@ import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/widgets/orbit_bottom_nav.dart';
+import 'package:currency_converter/core/widgets/nerkhak_bottom_nav.dart';
 import 'package:currency_converter/core/locator.dart';
 import 'package:currency_converter/features/rates/domain/entities/currency.dart';
 import 'package:currency_converter/features/rates/domain/entities/selected_currency.dart';
@@ -135,7 +135,7 @@ class _HomeView extends StatelessWidget {
                 .firstWhere((c) => !c.isBase, orElse: () => load.selected.first)
                 .code;
           }
-          return OrbitBottomNav(
+          return NerkhakBottomNav(
             currentIndex: 0,
             chartCurrencyCode: chartCode,
             chartBaseCode: baseCode,

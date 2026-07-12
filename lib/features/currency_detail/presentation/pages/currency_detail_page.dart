@@ -14,7 +14,7 @@ import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/widgets/orbit_bottom_nav.dart';
+import 'package:currency_converter/core/widgets/nerkhak_bottom_nav.dart';
 import 'package:currency_converter/features/currency_detail/domain/entities/range_option.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_bloc.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_event.dart';
@@ -64,7 +64,7 @@ class _DetailView extends StatelessWidget {
       bottomNavigationBar: BlocBuilder<DetailBloc, DetailState>(
         builder: (context, state) {
           final load = state.load;
-          return OrbitBottomNav(
+          return NerkhakBottomNav(
             currentIndex: 1,
             chartCurrencyCode:
                 load is DetailLoadCompleted ? load.code : null,
@@ -376,14 +376,14 @@ class _DetailView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     GText(
-                                      l10n.orbitInsightTitle,
+                                      l10n.nerkhakInsightTitle,
                                       style: AppTextStyles.labelSm(
                                         color: AppColors.primaryFixed,
                                       ),
                                     ),
                                     GGap.xs,
                                     GText(
-                                      l10n.orbitInsightBody(currencyName),
+                                      l10n.nerkhakInsightBody(currencyName),
                                       style: AppTextStyles.bodyMd(),
                                     ),
                                   ],

@@ -7,7 +7,7 @@ import 'package:currency_converter/features/currency_detail/presentation/pages/c
 import 'package:currency_converter/features/rates/presentation/pages/home_page.dart';
 import 'package:currency_converter/features/settings/presentation/pages/settings_page.dart';
 
-/// Central named-route table for Orbit.
+/// Central named-route table for Nerkhak.
 ///
 /// Example:
 /// ```dart

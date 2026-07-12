@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Design tokens extracted from the Stitch Orbit export.
+/// Design tokens extracted from the Stitch Nerkhak export.
 ///
 /// Always consume colors through [AppTheme] / [ThemeData] rather than
 /// hardcoding these values in feature widgets.

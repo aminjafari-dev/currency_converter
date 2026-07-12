@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:currency_converter/core/theme/app_colors.dart';
 
-/// Shared Orbit scaffold — use instead of raw [Scaffold] in feature pages.
+/// Shared Nerkhak scaffold — use instead of raw [Scaffold] in feature pages.
 ///
 /// Example:
 /// ```dart
 /// return GScaffold(
 ///   appBar: AppBar(title: GText(l10n.appName)),
 ///   body: child,
-///   bottomNavigationBar: const OrbitBottomNav(currentIndex: 0),
+///   bottomNavigationBar: const NerkhakBottomNav(currentIndex: 0),
 /// );
 /// ```
 class GScaffold extends StatelessWidget {

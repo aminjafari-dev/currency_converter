@@ -1,5 +1,5 @@
 name: currency_converter
-description: Orbit — a dark, modern currency converter built with Clean Architecture.
+description: Nerkhak — a dark, modern currency converter built with Clean Architecture.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -44,3 +44,10 @@ flutter:
 
   assets:
     - assets/images/
+
+  # Far Homa — Persian/Iranian UI text when locale is `fa`.
+  fonts:
+    - family: FarHoma
+      fonts:
+        - asset: assets/font/Far_Homa/Far_Homa.ttf
+

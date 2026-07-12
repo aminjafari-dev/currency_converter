@@ -1,4 +1,4 @@
-/// Named route constants for Orbit.
+/// Named route constants for Nerkhak.
 ///
 /// Always navigate with [PageName] values — never hardcode "/..." strings.
 ///

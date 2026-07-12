@@ -5,7 +5,7 @@ import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
 
-/// Shared Orbit button — lime-filled by default to match the Stitch accent.
+/// Shared Nerkhak button — lime-filled by default to match the Stitch accent.
 ///
 /// Example:
 /// ```dart

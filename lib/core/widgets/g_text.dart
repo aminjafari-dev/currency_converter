@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 
-/// Shared Orbit text widget — prefer this over raw [Text] in feature UI.
+/// Shared Nerkhak text widget — prefer this over raw [Text] in feature UI.
 ///
 /// Pass a [style] from [AppTextStyles], or rely on the default body style.
+/// When the app locale is Persian (`fa`), UI styles are remapped to Far Homa
+/// via [AppTextStyles.localize] so Iranian copy uses the bundled face.
 ///
 /// Example:
 /// ```dart
@@ -31,9 +33,13 @@ class GText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.maybeLocaleOf(context);
+    final base = style ?? AppTextStyles.bodyMd(color: AppColors.onSurface);
+
     return Text(
       data,
-      style: style ?? AppTextStyles.bodyMd(color: AppColors.onSurface),
+      // Remap Inter → Far Homa for `fa` without callers changing every screen.
+      style: AppTextStyles.localize(base, locale),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,

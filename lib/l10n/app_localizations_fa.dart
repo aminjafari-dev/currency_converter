@@ -9,7 +9,7 @@ class AppLocalizationsFa extends AppLocalizations {
   AppLocalizationsFa([String locale = 'fa']) : super(locale);
 
   @override
-  String get appName => 'اوربیت';
+  String get appName => 'نرخک';
 
   @override
   String get addCurrencyTitle => 'افزودن ارز';
@@ -82,10 +82,10 @@ class AppLocalizationsFa extends AppLocalizations {
   String get statPercentChange => 'درصد تغییر';
 
   @override
-  String get orbitInsightTitle => 'بینش اوربیت';
+  String get nerkhakInsightTitle => 'بینش نرخک';
 
   @override
-  String orbitInsightBody(String currency) {
+  String nerkhakInsightBody(String currency) {
     return '$currency در برابر پایه انتخاب‌شده فعال است. نرخ‌های مرجع روزانه از منابع رسمی به‌روز می‌شوند.';
   }
 

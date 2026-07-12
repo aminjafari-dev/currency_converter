@@ -27,7 +27,7 @@ class LocaleCubit extends Cubit<Locale> {
     return Locale(code);
   }
 
-  /// Supported locales for Orbit (English + Persian).
+  /// Supported locales for Nerkhak (English + Persian).
   static const supportedLocales = <Locale>[
     Locale('en'),
     Locale('fa'),

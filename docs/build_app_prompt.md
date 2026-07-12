@@ -1,4 +1,4 @@
-# Build Prompt — Flux Currency Converter (Flutter)
+# Build Prompt — Nerkhak Currency Converter (Flutter)
 
 Copy and paste everything below the line into a coding agent (or a new chat) when you are ready to build the app.
 
@@ -12,7 +12,7 @@ You are an expert Flutter developer. Build a production-ready **currency convert
 
 ## Product idea (what we are building)
 
-Build a dark, modern currency converter app (brand name in designs may appear as **Kinetic**, **Orbit**, or **Flux** — pick **one** final brand name, preferably **Flux**, and use it consistently in UI + localization).
+Build a dark, modern currency converter app branded **Nerkhak** (نرخک). Use this name consistently in UI + localization.
 
 ### Core experience
 
@@ -90,7 +90,7 @@ From `02_currency_detail_chart`:
 - Chart card with lime line + tooltip point
 - Range chips: `1D | 1W | 1M | 6M | 1Y | ALL` (selected chip lime filled)
 - Stats row: High / Low / % Change
-- “Orbit Insight” / insight card (v1: static/localized placeholder or simple generated copy; **not** required from FX API)
+- “Nerkhak Insight” / insight card (v1: static/localized placeholder or simple generated copy; **not** required from FX API)
 
 **Behavior:**
 

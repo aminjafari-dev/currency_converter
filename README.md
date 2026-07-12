@@ -1,10 +1,10 @@
-# Orbit Currency Converter
+# Nerkhak Currency Converter
 
 Dark, modern Flutter currency converter built with **Clean Architecture**, **feature-first** folders, and **flutter_bloc**.
 
 ## Brand
 
-**Orbit** — indicative mid-market / central-bank reference rates (Frankfurter), with **Iran free-market IRR** from Oanor.
+**Nerkhak** — indicative mid-market / central-bank reference rates (Frankfurter), with **Iran free-market IRR** from Oanor.
 
 ## Screens
 

@@ -3,22 +3,33 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:currency_converter/core/theme/app_colors.dart';
+import 'package:currency_converter/core/theme/app_fonts.dart';
 
-/// Builds the dark Orbit [ThemeData] from Stitch design tokens.
+/// Builds the dark Nerkhak [ThemeData] from Stitch design tokens.
 ///
-/// Wire this into [MaterialApp.theme]. Do not invent a light theme for v1 —
-/// the Stitch export is dark-only.
+/// Wire this into [MaterialApp.theme]. Pass the active [locale] so Persian
+/// builds use Far Homa as the default Material text family.
+///
+/// Do not invent a light theme for v1 — the Stitch export is dark-only.
 ///
 /// Example:
 /// ```dart
-/// MaterialApp(theme: AppTheme.dark());
+/// MaterialApp(theme: AppTheme.dark(locale: locale));
 /// ```
 abstract final class AppTheme {
-  /// Dark Orbit theme used across the whole app.
-  static ThemeData dark() {
+  /// Dark Nerkhak theme used across the whole app.
+  ///
+  /// When [locale] is Persian, [ThemeData.fontFamily] and the text theme use
+  /// Far Homa so Material defaults (AppBar, SnackBar, Input hints) match
+  /// Iranian UI copy. Latin locales keep Inter via Google Fonts.
+  static ThemeData dark({Locale? locale}) {
+    final isPersian = AppFonts.isPersian(locale);
+
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      // Default family for widgets that don't set an explicit TextStyle.
+      fontFamily: isPersian ? AppFonts.farHoma : null,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryFixed,
@@ -45,11 +56,19 @@ abstract final class AppTheme {
       ),
     );
 
+    final TextTheme textTheme = isPersian
+        ? base.textTheme.apply(
+            fontFamily: AppFonts.farHoma,
+            bodyColor: AppColors.onSurface,
+            displayColor: AppColors.onSurface,
+          )
+        : GoogleFonts.interTextTheme(base.textTheme).apply(
+            bodyColor: AppColors.onSurface,
+            displayColor: AppColors.onSurface,
+          );
+
     return base.copyWith(
-      textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
-        bodyColor: AppColors.onSurface,
-        displayColor: AppColors.onSurface,
-      ),
+      textTheme: textTheme,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.onSurface,
@@ -72,11 +91,17 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primaryFixed),
         ),
-        hintStyle: const TextStyle(color: AppColors.onTertiaryContainer),
+        hintStyle: TextStyle(
+          color: AppColors.onTertiaryContainer,
+          fontFamily: isPersian ? AppFonts.farHoma : null,
+        ),
       ),
-      snackBarTheme: const SnackBarThemeData(
+      snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surfaceContainerHigh,
-        contentTextStyle: TextStyle(color: AppColors.onSurface),
+        contentTextStyle: TextStyle(
+          color: AppColors.onSurface,
+          fontFamily: isPersian ? AppFonts.farHoma : null,
+        ),
       ),
     );
   }

@@ -42,7 +42,7 @@ class TgjuIrrRemoteDataSource implements OanorIrrRemoteDataSource {
                 receiveTimeout: const Duration(seconds: 30),
                 headers: const {
                   'Accept': 'application/json',
-                  'User-Agent': 'OrbitCurrencyConverter/1.0',
+                  'User-Agent': 'NerkhakCurrencyConverter/1.0',
                 },
               ),
             );

@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Orbit';
+  String get appName => 'Nerkhak';
 
   @override
   String get addCurrencyTitle => 'Add Currency';
@@ -82,10 +82,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statPercentChange => '% Change';
 
   @override
-  String get orbitInsightTitle => 'Orbit Insight';
+  String get nerkhakInsightTitle => 'Nerkhak Insight';
 
   @override
-  String orbitInsightBody(String currency) {
+  String nerkhakInsightBody(String currency) {
     return '$currency remains active against the selected base. Indicative reference rates are updated daily from official sources.';
   }
 

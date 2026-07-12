@@ -2,7 +2,7 @@
 
 ## Description
 
-The **rates** feature is the shared FX engine for Orbit. It fetches indicative reference rates from **Frankfurter** for global currencies, overlays **free-market Iranian Rial (IRR)** from the **Oanor Iran Rial Market API**, caches snapshots locally, persists the user's selected currency list, and hosts the Home (Currency List) presentation layer. Other features depend only on this feature's **domain** layer (entities + use cases), never on its data models.
+The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative reference rates from **Frankfurter** for global currencies, overlays **free-market Iranian Rial (IRR)** from the **Oanor Iran Rial Market API**, caches snapshots locally, persists the user's selected currency list, and hosts the Home (Currency List) presentation layer. Other features depend only on this feature's **domain** layer (entities + use cases), never on its data models.
 
 ## Architecture
 

@@ -14,12 +14,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupLocator();
   Bloc.observer = AppBlocObserver();
-  runApp(const OrbitApp());
+  runApp(const NerkhakApp());
 }
 
-/// Root Orbit application widget.
-class OrbitApp extends StatelessWidget {
-  const OrbitApp({super.key});
+/// Root Nerkhak application widget.
+///
+/// Example: `runApp(const NerkhakApp());`
+class NerkhakApp extends StatelessWidget {
+  const NerkhakApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +30,10 @@ class OrbitApp extends StatelessWidget {
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) {
           return MaterialApp(
-            title: 'Orbit',
+            title: 'Nerkhak',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.dark(),
+            // Rebuild theme with Far Homa when locale is Persian (`fa`).
+            theme: AppTheme.dark(locale: locale),
             locale: locale,
             supportedLocales: LocaleCubit.supportedLocales,
             localizationsDelegates: const [
