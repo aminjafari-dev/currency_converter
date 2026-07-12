@@ -1,10 +1,15 @@
 import 'package:dartz/dartz.dart';
 
+import 'package:currency_converter/core/constants/app_constants.dart';
 import 'package:currency_converter/core/error/exceptions.dart';
 import 'package:currency_converter/core/error/failures.dart';
 import 'package:currency_converter/core/network/network_info.dart';
 import 'package:currency_converter/features/rates/data/datasources/local/rates_local_data_source.dart';
 import 'package:currency_converter/features/rates/data/datasources/remote/frankfurter_remote_data_source.dart';
+import 'package:currency_converter/features/rates/data/datasources/remote/oanor_irr_remote_data_source.dart';
+import 'package:currency_converter/features/rates/data/models/historical_series_model.dart';
+import 'package:currency_converter/features/rates/data/models/rate_snapshot_model.dart';
+import 'package:currency_converter/features/rates/data/utils/irr_rate_overlay.dart';
 import 'package:currency_converter/features/rates/domain/entities/currency.dart';
 import 'package:currency_converter/features/rates/domain/entities/historical_series.dart';
 import 'package:currency_converter/features/rates/domain/entities/rate_snapshot.dart';
@@ -13,15 +18,20 @@ import 'package:currency_converter/features/rates/domain/repositories/rates_repo
 
 /// Concrete [RatesRepository] — single source of truth for rates + selection.
 ///
-/// Online: fetch remote → cache → return domain entities.
-/// Offline: return cached entities, or [CacheFailure] / [NetworkFailure].
+/// Online: Frankfurter for global FX, Oanor overlay for free-market IRR,
+/// then cache → domain entities. Offline: cached entities or failures.
+///
+/// Example: `repository.getLatestRates(base: 'USD')` returns a snapshot whose
+/// `rates['IRR']` comes from Oanor when the marketplace key is subscribed.
 class RatesRepositoryImpl implements RatesRepository {
   final RatesRemoteDataSource remoteDataSource;
+  final OanorIrrRemoteDataSource oanorIrrRemoteDataSource;
   final RatesLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
 
   RatesRepositoryImpl({
     required this.remoteDataSource,
+    required this.oanorIrrRemoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
   });
@@ -38,13 +48,16 @@ class RatesRepositoryImpl implements RatesRepository {
   }) async {
     if (await networkInfo.isConnected) {
       try {
+        // Ensure USD is present when we need a triangular Oanor IRR bridge.
+        final requestSymbols = _symbolsForIrrBridge(base: base, symbols: symbols);
         final remote = await remoteDataSource.getLatestRates(
           base: base,
-          symbols: symbols,
+          symbols: requestSymbols,
         );
+        final overlayed = await _overlayLatestIrr(remote);
         final now = DateTime.now();
-        await localDataSource.cacheLatestRates(remote, now);
-        return Right(remote.toDomain(fetchedAt: now));
+        await localDataSource.cacheLatestRates(overlayed, now);
+        return Right(overlayed.toDomain(fetchedAt: now));
       } on ServerException catch (e) {
         // Soft-fail to cache when the network call fails.
         final cached = await _cachedSnapshot();
@@ -56,6 +69,35 @@ class RatesRepositoryImpl implements RatesRepository {
     final cached = await _cachedSnapshot();
     if (cached != null) return Right(cached);
     return const Left(NetworkFailure());
+  }
+
+  /// Replaces Frankfurter IRR with free-market IRR (Oanor → TGJU cascade).
+  ///
+  /// Soft-fails only if **both** Iran-market sources fail — otherwise Home
+  /// would keep showing Frankfurter’s wrong ~1.37M official-style IRR.
+  Future<RateSnapshotModel> _overlayLatestIrr(RateSnapshotModel frankfurter) async {
+    try {
+      final foreignToIrr = await oanorIrrRemoteDataSource.getForeignToIrrRates();
+      return overlayIrrOnSnapshot(
+        frankfurter: frankfurter,
+        foreignToIrr: foreignToIrr,
+      );
+    } on ServerException {
+      return frankfurter;
+    }
+  }
+
+  /// Adds `USD` to [symbols] when the base is not USD/IRR and the caller
+  /// filtered the quote list — needed for `base → USD → IRR` triangulation.
+  List<String>? _symbolsForIrrBridge({
+    required String base,
+    List<String>? symbols,
+  }) {
+    if (symbols == null || symbols.isEmpty) return symbols;
+    final upperBase = base.toUpperCase();
+    if (upperBase == 'USD' || upperBase == 'IRR') return symbols;
+    if (symbols.map((s) => s.toUpperCase()).contains('USD')) return symbols;
+    return [...symbols, 'USD'];
   }
 
   Future<RateSnapshot?> _cachedSnapshot() async {
@@ -78,12 +120,14 @@ class RatesRepositoryImpl implements RatesRepository {
   }) async {
     final startStr = _fmt(start);
     final endStr = _fmt(end);
+    final upperBase = base.toUpperCase();
+    final upperQuote = quote.toUpperCase();
 
     if (await networkInfo.isConnected) {
       try {
-        final remote = await remoteDataSource.getHistoricalSeries(
-          base: base,
-          quote: quote,
+        final remote = await _historicalWithIrrOverlay(
+          base: upperBase,
+          quote: upperQuote,
           start: start,
           end: end,
         );
@@ -91,8 +135,8 @@ class RatesRepositoryImpl implements RatesRepository {
         return Right(remote.toDomain());
       } on ServerException catch (e) {
         final cached = await localDataSource.getCachedHistoricalSeries(
-          base: base,
-          quote: quote,
+          base: upperBase,
+          quote: upperQuote,
           startDate: startStr,
           endDate: endStr,
         );
@@ -103,8 +147,8 @@ class RatesRepositoryImpl implements RatesRepository {
 
     try {
       final cached = await localDataSource.getCachedHistoricalSeries(
-        base: base,
-        quote: quote,
+        base: upperBase,
+        quote: upperQuote,
         startDate: startStr,
         endDate: endStr,
       );
@@ -112,6 +156,61 @@ class RatesRepositoryImpl implements RatesRepository {
       return const Left(NetworkFailure());
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
+    }
+  }
+
+  /// Prefers Oanor history when either side of the pair is IRR and the
+  /// foreign leg is an Oanor-listed currency; otherwise uses Frankfurter.
+  Future<HistoricalSeriesModel> _historicalWithIrrOverlay({
+    required String base,
+    required String quote,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    final involvesIrr = base == 'IRR' || quote == 'IRR';
+    if (!involvesIrr) {
+      return remoteDataSource.getHistoricalSeries(
+        base: base,
+        quote: quote,
+        start: start,
+        end: end,
+      );
+    }
+
+    final foreign = base == 'IRR' ? quote : base;
+    final supported = AppConstants.oanorIrrForeignCodes.contains(foreign);
+    // Fall back to Frankfurter when Oanor does not list this foreign code.
+    if (!supported) {
+      return remoteDataSource.getHistoricalSeries(
+        base: base,
+        quote: quote,
+        start: start,
+        end: end,
+      );
+    }
+
+    try {
+      final daySpan = end.difference(start).inDays.abs() + 1;
+      final oanorHistory = await oanorIrrRemoteDataSource.getForeignToIrrHistory(
+        foreignCode: foreign,
+        limit: daySpan,
+        start: start,
+        end: end,
+      );
+      return overlayIrrOnHistory(
+        foreignToIrrHistory: oanorHistory,
+        base: base,
+        quote: quote,
+        invertToIrrBase: base == 'IRR',
+      );
+    } on ServerException {
+      // Soft-fail charts to Frankfurter if Oanor history is unavailable.
+      return remoteDataSource.getHistoricalSeries(
+        base: base,
+        quote: quote,
+        start: start,
+        end: end,
+      );
     }
   }
 

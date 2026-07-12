@@ -9,6 +9,37 @@ abstract final class AppConstants {
   static const String localeKey = 'app_locale';
   static const String defaultBaseCurrency = 'USD';
 
+  /// Oanor Iran Rial Market API gateway (free-market / bazaar IRR only).
+  static const String oanorBaseUrl = 'https://api.oanor.com/irr-api';
+
+  /// Oanor marketplace key for IRR overrides.
+  ///
+  /// Override at build time without editing source:
+  /// `flutter run --dart-define=OANOR_API_KEY=oanor_live_…`
+  ///
+  /// Also subscribe the key to **Iran Rial Market API** on oanor.com
+  /// (Free tier is enough) — otherwise calls return `subscription_required`.
+  static const String oanorApiKey = String.fromEnvironment(
+    'OANOR_API_KEY',
+    defaultValue:
+        'oanor_live_b1116527294d6f3878249c75480ad32dd744f4018916503c34cb68b7ee569d3d',
+  );
+
+  /// Foreign ISO codes Oanor prices directly vs IRR (lowercase on the wire).
+  static const Set<String> oanorIrrForeignCodes = {
+    'USD',
+    'EUR',
+    'GBP',
+    'AED',
+    'TRY',
+    'CAD',
+    'AUD',
+    'CHF',
+    'CNY',
+    'JPY',
+    'RUB',
+  };
+
   /// Default selected list when the user has never customized.
   static const List<String> defaultSelectedCurrencies = [
     'USD',

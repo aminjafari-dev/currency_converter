@@ -18,6 +18,7 @@ Future<void> setupLocator() async {
   final prefs = await SharedPreferences.getInstance();
   locator.registerSingleton<SharedPreferences>(prefs);
 
+  // Frankfurter client (global FX). Oanor client is registered in rates_di.
   locator.registerLazySingleton(() => ApiClient());
   locator.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoImpl(Connectivity()),

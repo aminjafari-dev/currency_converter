@@ -4,7 +4,7 @@ Dark, modern Flutter currency converter built with **Clean Architecture**, **fea
 
 ## Brand
 
-**Orbit** — indicative mid-market / central-bank reference rates (Frankfurter), not bank cash rates.
+**Orbit** — indicative mid-market / central-bank reference rates (Frankfurter), with **Iran free-market IRR** from Oanor.
 
 ## Screens
 
@@ -23,7 +23,7 @@ Design source: Stitch export under `stitch_export/` (HTML + screenshots).
 - Flutter + `flutter_bloc` + `freezed`
 - Dartz `Either<Failure, T>`
 - GetIt feature DI
-- Dio → Frankfurter v2 (`api.frankfurter.dev`)
+- Dio → Frankfurter v2 (`api.frankfurter.dev`) + Oanor irr-api (IRR overlay only)
 - SharedPreferences cache
 - `fl_chart`, `country_flags`, `gap`, `google_fonts`
 - l10n: English + Persian (`fa`) with RTL
