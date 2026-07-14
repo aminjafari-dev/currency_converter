@@ -70,9 +70,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rangeOneYear => '1Y';
 
   @override
-  String get rangeAll => 'ALL';
-
-  @override
   String get statHigh => 'High';
 
   @override

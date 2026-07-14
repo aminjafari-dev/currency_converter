@@ -200,12 +200,6 @@ abstract class AppLocalizations {
   /// **'1Y'**
   String get rangeOneYear;
 
-  /// No description provided for @rangeAll.
-  ///
-  /// In en, this message translates to:
-  /// **'ALL'**
-  String get rangeAll;
-
   /// No description provided for @statHigh.
   ///
   /// In en, this message translates to:

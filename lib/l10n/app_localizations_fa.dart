@@ -55,22 +55,19 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get rangeOneDay => '۱ر';
+  String get rangeOneDay => '۱ روز';
 
   @override
-  String get rangeOneWeek => '۱ه';
+  String get rangeOneWeek => '۱ هفته';
 
   @override
-  String get rangeOneMonth => '۱م';
+  String get rangeOneMonth => '۱ ماه';
 
   @override
-  String get rangeSixMonths => '۶م';
+  String get rangeSixMonths => '۶ ماه';
 
   @override
-  String get rangeOneYear => '۱س';
-
-  @override
-  String get rangeAll => 'همه';
+  String get rangeOneYear => '۱ سال';
 
   @override
   String get statHigh => 'بیشینه';

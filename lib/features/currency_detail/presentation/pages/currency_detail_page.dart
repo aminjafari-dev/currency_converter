@@ -34,6 +34,17 @@ class CurrencyDetailPage extends StatelessWidget {
 }
 
 class _DetailView extends StatelessWidget {
+  /// Chart ranges shown in the selector.
+  ///
+  /// Example: `_visibleRanges.map((range) => _rangeLabel(l10n, range))`.
+  static const List<RangeOption> _visibleRanges = [
+    RangeOption.oneDay,
+    RangeOption.oneWeek,
+    RangeOption.oneMonth,
+    RangeOption.sixMonths,
+    RangeOption.oneYear,
+  ];
+
   const _DetailView();
 
   String _rangeLabel(AppLocalizations l10n, RangeOption range) {
@@ -48,8 +59,6 @@ class _DetailView extends StatelessWidget {
         return l10n.rangeSixMonths;
       case RangeOption.oneYear:
         return l10n.rangeOneYear;
-      case RangeOption.all:
-        return l10n.rangeAll;
     }
   }
 
@@ -110,14 +119,15 @@ class _DetailView extends StatelessWidget {
                         GGap.hXs,
                         GText(
                           code,
-                          style: AppTextStyles.headlineMd(weight: FontWeight.w700),
+                          style:
+                              AppTextStyles.headlineMd(weight: FontWeight.w700),
                         ),
                       ],
                     ),
                     actions: [
                       Padding(
-                        padding: const EdgeInsets.only(
-                          right: AppSpacing.containerMargin,
+                        padding: const EdgeInsetsDirectional.only(
+                          end: AppSpacing.containerMargin,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -156,7 +166,8 @@ class _DetailView extends StatelessWidget {
                             ),
                             GGap.hXs,
                             GText(
-                              CurrencyFormatter.formatRate(liveRate, fractionDigits: 2),
+                              CurrencyFormatter.formatRate(liveRate,
+                                  fractionDigits: 2),
                               style: AppTextStyles.numeralXl(),
                             ),
                             GGap.hXs,
@@ -168,9 +179,8 @@ class _DetailView extends StatelessWidget {
                           children: [
                             Icon(
                               up ? Icons.trending_up : Icons.trending_down,
-                              color: up
-                                  ? AppColors.primaryFixed
-                                  : AppColors.error,
+                              color:
+                                  up ? AppColors.primaryFixed : AppColors.error,
                               size: 18,
                             ),
                             GGap.hXs,
@@ -204,8 +214,7 @@ class _DetailView extends StatelessWidget {
                               : LineChart(
                                   LineChartData(
                                     gridData: const FlGridData(show: false),
-                                    titlesData:
-                                        const FlTitlesData(show: false),
+                                    titlesData: const FlTitlesData(show: false),
                                     borderData: FlBorderData(show: false),
                                     lineTouchData: LineTouchData(
                                       touchTooltipData: LineTouchTooltipData(
@@ -260,7 +269,7 @@ class _DetailView extends StatelessWidget {
                             ),
                           ),
                           child: Row(
-                            children: RangeOption.values.map((option) {
+                            children: _visibleRanges.map((option) {
                               final selected = option == range;
                               return Expanded(
                                 child: GestureDetector(

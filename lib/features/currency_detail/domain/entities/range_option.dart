@@ -11,8 +11,7 @@ enum RangeOption {
   oneWeek,
   oneMonth,
   sixMonths,
-  oneYear,
-  all;
+  oneYear;
 
   /// Start date for the historical series request.
   DateTime startDate({DateTime? now}) {
@@ -29,8 +28,6 @@ enum RangeOption {
         return n.subtract(const Duration(days: 182));
       case RangeOption.oneYear:
         return n.subtract(const Duration(days: 365));
-      case RangeOption.all:
-        return DateTime(1999, 1, 4);
     }
   }
 }

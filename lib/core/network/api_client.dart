@@ -20,7 +20,7 @@ class ApiClient {
               BaseOptions(
                 baseUrl: 'https://api.frankfurter.dev',
                 connectTimeout: const Duration(seconds: 15),
-                // Long chart ranges (e.g. ALL) can return large v2 row lists.
+                // Longer chart ranges can return large v2 row lists.
                 receiveTimeout: const Duration(seconds: 45),
                 headers: const {
                   'Accept': 'application/json',
