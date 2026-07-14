@@ -98,6 +98,7 @@ class _MainShellPageState extends State<MainShellPage> {
       child: GScaffold(
         // Notch bar floats over tab content; each tab keeps its own AppBar.
         extendBody: true,
+        reserveBottomSpace: false,
         bottomNavigationBar: NerkhakBottomNav(
           currentIndex: _currentIndex,
           onTap: _onTabSelected,

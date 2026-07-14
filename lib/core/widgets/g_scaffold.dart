@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:currency_converter/core/theme/app_spacing.dart';
+
 /// Shared Nerkhak scaffold — use instead of raw [Scaffold] in feature pages.
 ///
 /// Example:
@@ -23,6 +25,12 @@ class GScaffold extends StatelessWidget {
   final bool extendBody;
   final bool extendBodyBehindAppBar;
 
+  /// Reserves the standard 40 px page breathing room below feature content.
+  ///
+  /// Example: set to `false` on a shell scaffold when nested page scaffolds
+  /// already reserve the bottom space.
+  final bool reserveBottomSpace;
+
   const GScaffold({
     super.key,
     this.appBar,
@@ -32,6 +40,7 @@ class GScaffold extends StatelessWidget {
     this.backgroundColor,
     this.extendBody = false,
     this.extendBodyBehindAppBar = false,
+    this.reserveBottomSpace = true,
   });
 
   @override
@@ -41,7 +50,12 @@ class GScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor ?? colors.surface,
       appBar: appBar,
-      body: body,
+      body: Padding(
+        padding: EdgeInsets.only(
+          bottom: reserveBottomSpace ? AppSpacing.pageBottomSpace : 0,
+        ),
+        child: body,
+      ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       extendBody: extendBody,

@@ -15,6 +15,7 @@ abstract final class AppSpacing {
   static const double containerMargin = 20;
   static const double lg = 24;
   static const double xl = 32;
+  static const double pageBottomSpace = 40;
 
   static const double radiusDefault = 4;
   static const double radiusLg = 8;
