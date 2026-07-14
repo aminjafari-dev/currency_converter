@@ -26,7 +26,6 @@ dependencies:
   fl_chart: ^0.70.2
   country_flags: ^3.2.0
   intl: any
-  home_widget: ^0.7.0
   google_fonts: ^6.2.1
   animated_notch_bottom_bar: ^1.0.4
 

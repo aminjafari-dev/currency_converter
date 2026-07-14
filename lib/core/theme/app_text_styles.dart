@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_fonts.dart';
 
 /// Typography tokens from the Stitch Nerkhak design system.
@@ -24,7 +23,7 @@ abstract final class AppTextStyles {
         height: 40 / 32,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.02 * 32,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Mobile page title (24 / 32, weight 600).
@@ -33,7 +32,7 @@ abstract final class AppTextStyles {
         height: 32 / 24,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.01 * 24,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Section / currency code title (20 / 28, weight 500).
@@ -42,7 +41,7 @@ abstract final class AppTextStyles {
         fontSize: 20,
         height: 28 / 20,
         fontWeight: weight ?? FontWeight.w500,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Body large (18 / 26).
@@ -50,7 +49,7 @@ abstract final class AppTextStyles {
         fontSize: 18,
         height: 26 / 18,
         fontWeight: FontWeight.w400,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Body medium (16 / 24).
@@ -58,7 +57,7 @@ abstract final class AppTextStyles {
         fontSize: 16,
         height: 24 / 16,
         fontWeight: FontWeight.w400,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Small uppercase labels (12 / 16, weight 600).
@@ -67,7 +66,7 @@ abstract final class AppTextStyles {
         height: 16 / 12,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.05 * 12,
-        color: color ?? AppColors.onSurfaceVariant,
+        color: color,
       );
 
   /// Large mono numeral used for converted amounts (40 / 48).
@@ -76,7 +75,7 @@ abstract final class AppTextStyles {
         height: 48 / 40,
         fontWeight: FontWeight.w500,
         letterSpacing: -0.04 * 40,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Medium mono numeral used for rates / stats (18 / 24).
@@ -84,7 +83,7 @@ abstract final class AppTextStyles {
         fontSize: 18,
         height: 24 / 18,
         fontWeight: FontWeight.w500,
-        color: color ?? AppColors.onSurface,
+        color: color,
       );
 
   /// Swaps Latin UI fonts to Far Homa when [locale] is Persian.

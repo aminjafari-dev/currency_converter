@@ -110,6 +110,18 @@ abstract class AppLocalizations {
   /// **'Add Currency'**
   String get addCurrencyTitle;
 
+  /// Tooltip for tapping the chart header currency selector
+  ///
+  /// In en, this message translates to:
+  /// **'Change chart currency'**
+  String get changeChartCurrency;
+
+  /// Title of the bottom sheet used to choose the chart currency
+  ///
+  /// In en, this message translates to:
+  /// **'Select chart currency'**
+  String get chartCurrencyPickerTitle;
+
   /// Placeholder in the currency search field
   ///
   /// In en, this message translates to:
@@ -253,6 +265,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Persian'**
   String get settingsPersian;
+
+  /// Theme row label in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsTheme;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
 
   /// Placeholder body on the settings screen
   ///

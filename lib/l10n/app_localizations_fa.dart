@@ -15,6 +15,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get addCurrencyTitle => 'افزودن ارز';
 
   @override
+  String get changeChartCurrency => 'تغییر ارز نمودار';
+
+  @override
+  String get chartCurrencyPickerTitle => 'انتخاب ارز نمودار';
+
+  @override
   String get searchCurrencyHint => 'جستجوی ارز یا کشور';
 
   @override
@@ -97,6 +103,15 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get settingsPersian => 'فارسی';
+
+  @override
+  String get settingsTheme => 'پوسته';
+
+  @override
+  String get settingsThemeDark => 'تیره';
+
+  @override
+  String get settingsThemeLight => 'روشن';
 
   @override
   String get settingsPlaceholder => 'تنظیمات بیشتر به‌زودی.';

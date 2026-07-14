@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
-
 /// Shared Nerkhak scaffold — use instead of raw [Scaffold] in feature pages.
 ///
 /// Example:
@@ -38,8 +36,10 @@ class GScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: backgroundColor ?? AppColors.background,
+      backgroundColor: backgroundColor ?? colors.surface,
       appBar: appBar,
       body: body,
       floatingActionButton: floatingActionButton,

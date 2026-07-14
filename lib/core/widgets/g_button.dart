@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
@@ -29,6 +28,7 @@ class GButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final child = Row(
       mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +40,7 @@ class GButton extends StatelessWidget {
         GText(
           label,
           style: AppTextStyles.labelSm(
-            color: isOutlined ? AppColors.primaryFixed : AppColors.onPrimaryFixed,
+            color: isOutlined ? colors.primary : colors.onPrimary,
           ),
         ),
       ],
@@ -50,8 +50,8 @@ class GButton extends StatelessWidget {
       return OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primaryFixed,
-          side: const BorderSide(color: AppColors.primaryFixed),
+          foregroundColor: colors.primary,
+          side: BorderSide(color: colors.primary),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           ),
@@ -67,8 +67,8 @@ class GButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryFixed,
-        foregroundColor: AppColors.onPrimaryFixed,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         ),

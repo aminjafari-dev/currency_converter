@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/widgets/currency_flag.dart';
@@ -178,28 +177,26 @@ class _CurrencyRowState extends State<CurrencyRow> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
     // Persian (`fa`) is RTL — keep amounts physically left-aligned so rates
     // hug the outer edge instead of sitting toward the row center.
     final isPersian = Localizations.localeOf(context).languageCode == 'fa';
     // Green border only while this row's amount field is focused (not in edit mode).
     // Useful so tapping EUR clears the highlight from USD immediately.
     final isHighlighted = !widget.isEditing && _hasFocus;
-    final amountColor = isHighlighted
-        ? AppColors.primaryFixed
-        : AppColors.onSurfaceVariant;
+    final amountColor =
+        isHighlighted ? colors.primary : colors.onSurfaceVariant;
     final amountFontSize =
         _adaptiveAmountFontSize(_controller.text, amountColor);
 
     return Material(
-      color: isHighlighted
-          ? AppColors.surfaceContainer
-          : AppColors.surfaceContainerLow,
+      color:
+          isHighlighted ? colors.surfaceContainer : colors.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         side: BorderSide(
-          color: isHighlighted
-              ? AppColors.primaryFixed
-              : AppColors.surfaceContainerHighest,
+          color:
+              isHighlighted ? colors.primary : colors.surfaceContainerHighest,
         ),
       ),
       child: InkWell(
@@ -228,8 +225,8 @@ class _CurrencyRowState extends State<CurrencyRow> {
                   onPressed: widget.onRemove,
                   icon: const Icon(
                     Icons.remove_circle_outline,
-                    color: AppColors.error,
                   ),
+                  color: colors.error,
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
@@ -252,7 +249,7 @@ class _CurrencyRowState extends State<CurrencyRow> {
                     GText(
                       widget.name.toUpperCase(),
                       style: AppTextStyles.labelSm(
-                        color: AppColors.onTertiaryContainer,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -264,11 +261,11 @@ class _CurrencyRowState extends State<CurrencyRow> {
                   index: widget.dragIndex ?? 0,
                   child: Tooltip(
                     message: l10n.reorderCurrency,
-                    child: const Padding(
-                      padding: EdgeInsets.all(AppSpacing.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
                       child: Icon(
                         Icons.drag_handle,
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -283,8 +280,7 @@ class _CurrencyRowState extends State<CurrencyRow> {
                     child: TextField(
                       controller: _controller,
                       focusNode: _focusNode,
-                      textAlign:
-                          isPersian ? TextAlign.left : TextAlign.right,
+                      textAlign: isPersian ? TextAlign.left : TextAlign.right,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),

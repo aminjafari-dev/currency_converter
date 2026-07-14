@@ -8,7 +8,8 @@ import 'package:currency_converter/core/locale/locale_cubit.dart';
 import 'package:currency_converter/core/locator.dart';
 import 'package:currency_converter/core/router/page_name.dart';
 import 'package:currency_converter/core/router/page_router.dart';
-import 'package:currency_converter/core/theme/app_theme.dart';
+import 'package:currency_converter/core/theme/app_theme_cubit.dart';
+import 'package:currency_converter/core/theme/app_theme_mode.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,25 +26,34 @@ class NerkhakApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: locator<LocaleCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: locator<LocaleCubit>()),
+        BlocProvider.value(value: locator<AppThemeCubit>()),
+      ],
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) {
-          return MaterialApp(
-            title: 'Nerkhak',
-            debugShowCheckedModeBanner: false,
-            // Rebuild theme with Far Homa when locale is Persian (`fa`).
-            theme: AppTheme.dark(locale: locale),
-            locale: locale,
-            supportedLocales: LocaleCubit.supportedLocales,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            initialRoute: PageName.home,
-            routes: PageRouter.routes,
+          return BlocBuilder<AppThemeCubit, AppThemeMode>(
+            builder: (context, themeMode) {
+              return MaterialApp(
+                onGenerateTitle: (context) =>
+                    AppLocalizations.of(context).appName,
+                debugShowCheckedModeBanner: false,
+                // Theme and locale rebuild together so Persian fonts stay correct
+                // after switching between the dark and light palettes.
+                theme: themeMode.theme(locale: locale),
+                locale: locale,
+                supportedLocales: LocaleCubit.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                initialRoute: PageName.home,
+                routes: PageRouter.routes,
+              );
+            },
           );
         },
       ),

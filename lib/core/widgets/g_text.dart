@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 
 /// Shared Nerkhak text widget — prefer this over raw [Text] in feature UI.
@@ -33,8 +32,9 @@ class GText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final locale = Localizations.maybeLocaleOf(context);
-    final base = style ?? AppTextStyles.bodyMd(color: AppColors.onSurface);
+    final base = style ?? AppTextStyles.bodyMd(color: colors.onSurface);
 
     return Text(
       data,

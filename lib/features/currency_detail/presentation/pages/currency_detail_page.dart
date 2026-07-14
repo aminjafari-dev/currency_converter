@@ -3,19 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
+import 'package:currency_converter/core/locator.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
+import 'package:currency_converter/core/utils/currency_display_name.dart';
 import 'package:currency_converter/core/utils/currency_formatter.dart';
 import 'package:currency_converter/core/widgets/currency_flag.dart';
 import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
+import 'package:currency_converter/features/currency_catalog/presentation/bloc/add_currency_bloc.dart';
+import 'package:currency_converter/features/currency_catalog/presentation/bloc/add_currency_event.dart';
+import 'package:currency_converter/features/currency_catalog/presentation/bloc/add_currency_state.dart';
 import 'package:currency_converter/features/currency_detail/domain/entities/range_option.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_bloc.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_event.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_state.dart';
+import 'package:currency_converter/features/rates/domain/entities/currency.dart';
 
 /// Currency Detail & Chart tab body (Stitch `02_currency_detail_chart`).
 ///
@@ -62,17 +67,57 @@ class _DetailView extends StatelessWidget {
     }
   }
 
+  /// Opens the chart currency picker and reloads [DetailBloc] with the chosen
+  /// quote currency while keeping the current base.
+  ///
+  /// Example: tapping `EUR` in the Chart app bar can restart the chart as
+  /// `GBP/USD` without changing the Convert tab list.
+  Future<void> _changeChartCurrency(
+    BuildContext context, {
+    required String code,
+    required String baseCode,
+  }) async {
+    final detailBloc = context.read<DetailBloc>();
+    final colors = Theme.of(context).colorScheme;
+
+    final selectedCode = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
+      ),
+      builder: (_) {
+        return BlocProvider(
+          create: (_) =>
+              locator<AddCurrencyBloc>()..add(const AddCurrencyEvent.started()),
+          child: _ChartCurrencyPickerSheet(
+            currentCode: code,
+            baseCode: baseCode,
+          ),
+        );
+      },
+    );
+
+    if (selectedCode == null || selectedCode == code) return;
+    detailBloc.add(DetailEvent.started(code: selectedCode, baseCode: baseCode));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return GScaffold(
       body: BlocBuilder<DetailBloc, DetailState>(
         builder: (context, state) {
           return state.load.when(
             initial: () => const SizedBox.shrink(),
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryFixed),
+            loading: () => Center(
+              child: CircularProgressIndicator(color: colors.primary),
             ),
             error: (message) => Center(
               child: Column(
@@ -111,18 +156,62 @@ class _DetailView extends StatelessWidget {
                   // No leading back — Chart is a shell tab, not a pushed route.
                   SliverAppBar(
                     pinned: true,
-                    backgroundColor: AppColors.background,
+                    backgroundColor: colors.surface,
                     automaticallyImplyLeading: false,
-                    title: Row(
-                      children: [
-                        CurrencyFlag(code: code, size: 24),
-                        GGap.hXs,
-                        GText(
-                          code,
-                          style:
-                              AppTextStyles.headlineMd(weight: FontWeight.w700),
+                    title: Tooltip(
+                      message: l10n.changeChartCurrency,
+                      child: InkWell(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusFull),
+                        onTap: () {
+                          _changeChartCurrency(
+                            context,
+                            code: code,
+                            baseCode: baseCode,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.xs,
+                            vertical: AppSpacing.xs,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CurrencyFlag(code: code, size: 24),
+                              GGap.hXs,
+                              Flexible(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GText(
+                                      code,
+                                      style: AppTextStyles.headlineMd(
+                                        weight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    GText(
+                                      currencyName,
+                                      style: AppTextStyles.labelSm(
+                                        color: colors.onSurfaceVariant,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              GGap.hXs,
+                              Icon(
+                                Icons.expand_more,
+                                size: 20,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                     actions: [
                       Padding(
@@ -136,13 +225,13 @@ class _DetailView extends StatelessWidget {
                             GText(
                               l10n.liveRate,
                               style: AppTextStyles.labelSm(
-                                color: AppColors.onSurfaceVariant,
+                                color: colors.onSurfaceVariant,
                               ),
                             ),
                             GText(
                               CurrencyFormatter.formatRate(liveRate),
                               style: AppTextStyles.numeralMd(
-                                color: AppColors.primaryFixed,
+                                color: colors.primary,
                               ),
                             ),
                           ],
@@ -161,7 +250,7 @@ class _DetailView extends StatelessWidget {
                             GText(
                               l10n.conversionLine(baseCode),
                               style: AppTextStyles.labelSm(
-                                color: AppColors.onSurfaceVariant,
+                                color: colors.onSurfaceVariant,
                               ),
                             ),
                             GGap.hXs,
@@ -179,8 +268,7 @@ class _DetailView extends StatelessWidget {
                           children: [
                             Icon(
                               up ? Icons.trending_up : Icons.trending_down,
-                              color:
-                                  up ? AppColors.primaryFixed : AppColors.error,
+                              color: up ? colors.primary : colors.error,
                               size: 18,
                             ),
                             GGap.hXs,
@@ -190,9 +278,7 @@ class _DetailView extends StatelessWidget {
                                 todayPercent.abs().toStringAsFixed(2),
                               ),
                               style: AppTextStyles.labelSm(
-                                color: up
-                                    ? AppColors.primaryFixed
-                                    : AppColors.error,
+                                color: up ? colors.primary : colors.error,
                               ),
                             ),
                           ],
@@ -202,11 +288,11 @@ class _DetailView extends StatelessWidget {
                           height: 220,
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerLow,
+                            color: colors.surfaceContainerLow,
                             borderRadius:
                                 BorderRadius.circular(AppSpacing.radiusXl),
                             border: Border.all(
-                              color: AppColors.surfaceContainerHighest,
+                              color: colors.surfaceContainerHighest,
                             ),
                           ),
                           child: spots.length < 2
@@ -219,13 +305,13 @@ class _DetailView extends StatelessWidget {
                                     lineTouchData: LineTouchData(
                                       touchTooltipData: LineTouchTooltipData(
                                         getTooltipColor: (_) =>
-                                            AppColors.surfaceContainerHigh,
+                                            colors.surfaceContainerHigh,
                                         getTooltipItems: (touched) {
                                           return touched.map((t) {
                                             return LineTooltipItem(
                                               t.y.toStringAsFixed(3),
                                               AppTextStyles.numeralMd(
-                                                color: AppColors.primaryFixed,
+                                                color: colors.primary,
                                               ),
                                             );
                                           }).toList();
@@ -236,7 +322,7 @@ class _DetailView extends StatelessWidget {
                                       LineChartBarData(
                                         spots: spots,
                                         isCurved: true,
-                                        color: AppColors.primaryFixed,
+                                        color: colors.primary,
                                         barWidth: 3,
                                         dotData: const FlDotData(show: false),
                                         belowBarData: BarAreaData(
@@ -245,9 +331,9 @@ class _DetailView extends StatelessWidget {
                                             begin: Alignment.topCenter,
                                             end: Alignment.bottomCenter,
                                             colors: [
-                                              AppColors.primaryFixed
+                                              colors.primary
                                                   .withValues(alpha: 0.2),
-                                              AppColors.primaryFixed
+                                              colors.primary
                                                   .withValues(alpha: 0.0),
                                             ],
                                           ),
@@ -261,11 +347,11 @@ class _DetailView extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerLow,
+                            color: colors.surfaceContainerLow,
                             borderRadius:
                                 BorderRadius.circular(AppSpacing.radiusFull),
                             border: Border.all(
-                              color: AppColors.surfaceContainerHighest,
+                              color: colors.surfaceContainerHighest,
                             ),
                           ),
                           child: Row(
@@ -286,7 +372,7 @@ class _DetailView extends StatelessWidget {
                                     ),
                                     decoration: BoxDecoration(
                                       color: selected
-                                          ? AppColors.primaryFixed
+                                          ? colors.primary
                                           : Colors.transparent,
                                       borderRadius: BorderRadius.circular(
                                         AppSpacing.radiusFull,
@@ -297,8 +383,8 @@ class _DetailView extends StatelessWidget {
                                       _rangeLabel(l10n, option),
                                       style: AppTextStyles.labelSm(
                                         color: selected
-                                            ? AppColors.onPrimaryFixed
-                                            : AppColors.onSurfaceVariant,
+                                            ? colors.onPrimary
+                                            : colors.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -330,7 +416,7 @@ class _DetailView extends StatelessWidget {
                               label: l10n.statPercentChange,
                               value:
                                   '${stats.percentChange >= 0 ? '+' : ''}${stats.percentChange.toStringAsFixed(1)}%',
-                              valueColor: AppColors.primaryFixed,
+                              valueColor: colors.primary,
                             ),
                           ],
                         ),
@@ -338,11 +424,11 @@ class _DetailView extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(AppSpacing.lg),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryFixedMuted,
+                            color: colors.primary.withValues(alpha: 0.05),
                             borderRadius:
                                 BorderRadius.circular(AppSpacing.radiusXl),
                             border: Border.all(
-                              color: AppColors.primaryFixedBorder,
+                              color: colors.primary.withValues(alpha: 0.20),
                             ),
                           ),
                           child: Row(
@@ -351,15 +437,14 @@ class _DetailView extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.sm),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryFixed
-                                      .withValues(alpha: 0.10),
+                                  color: colors.primary.withValues(alpha: 0.10),
                                   borderRadius: BorderRadius.circular(
                                     AppSpacing.radiusLg,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.insights,
-                                  color: AppColors.primaryFixed,
+                                  color: colors.primary,
                                 ),
                               ),
                               GGap.hMd,
@@ -370,7 +455,7 @@ class _DetailView extends StatelessWidget {
                                     GText(
                                       l10n.nerkhakInsightTitle,
                                       style: AppTextStyles.labelSm(
-                                        color: AppColors.primaryFixed,
+                                        color: colors.primary,
                                       ),
                                     ),
                                     GGap.xs,
@@ -398,6 +483,231 @@ class _DetailView extends StatelessWidget {
   }
 }
 
+/// Bottom sheet used by the Chart tab to choose the quote currency.
+///
+/// It reuses [AddCurrencyBloc] for catalog loading and search, but it only
+/// returns the tapped currency code; it does not add/remove Home currencies.
+class _ChartCurrencyPickerSheet extends StatelessWidget {
+  final String currentCode;
+  final String baseCode;
+
+  const _ChartCurrencyPickerSheet({
+    required this.currentCode,
+    required this.baseCode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.72,
+      minChildSize: 0.45,
+      maxChildSize: 0.92,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.containerMargin,
+            AppSpacing.md,
+            AppSpacing.containerMargin,
+            0,
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+              ),
+              GGap.md,
+              Row(
+                children: [
+                  Expanded(
+                    child: GText(
+                      l10n.chartCurrencyPickerTitle,
+                      style: AppTextStyles.headlineMd(
+                        weight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip:
+                        MaterialLocalizations.of(context).closeButtonTooltip,
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              GGap.md,
+              TextField(
+                onChanged: (query) {
+                  context
+                      .read<AddCurrencyBloc>()
+                      .add(AddCurrencyEvent.searchChanged(query: query));
+                },
+                style: AppTextStyles.localize(
+                  AppTextStyles.bodyMd(color: colors.onSurface),
+                  Localizations.localeOf(context),
+                ),
+                decoration: InputDecoration(
+                  hintText: l10n.searchCurrencyHint,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              GGap.md,
+              Expanded(
+                child: BlocBuilder<AddCurrencyBloc, AddCurrencyState>(
+                  builder: (context, state) {
+                    return state.load.when(
+                      initial: () => const SizedBox.shrink(),
+                      loading: () => Center(
+                        child: CircularProgressIndicator(
+                          color: colors.primary,
+                        ),
+                      ),
+                      error: (message) => Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            GText(message, textAlign: TextAlign.center),
+                            GGap.md,
+                            GButton(
+                              label: l10n.retry,
+                              onPressed: () {
+                                context.read<AddCurrencyBloc>().add(
+                                      const AddCurrencyEvent.started(),
+                                    );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      completed: (all, filtered, selectedCodes, query) {
+                        final currencies = filtered
+                            .where(
+                              (currency) =>
+                                  currency.code.toUpperCase() !=
+                                  baseCode.toUpperCase(),
+                            )
+                            .toList();
+
+                        if (currencies.isEmpty) {
+                          return Center(child: GText(l10n.emptySearch));
+                        }
+
+                        return ListView.builder(
+                          controller: scrollController,
+                          itemCount: currencies.length,
+                          itemBuilder: (context, index) {
+                            final currency = currencies[index];
+                            return _ChartCurrencyPickerTile(
+                              currency: currency,
+                              currentCode: currentCode,
+                              onTap: () {
+                                Navigator.of(context).pop(currency.code);
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Single currency row inside the Chart picker.
+///
+/// Shows the localized currency name and a check icon for the chart's current
+/// quote so the user can recognize the active selection before changing it.
+class _ChartCurrencyPickerTile extends StatelessWidget {
+  final Currency currency;
+  final String currentCode;
+  final VoidCallback onTap;
+
+  const _ChartCurrencyPickerTile({
+    required this.currency,
+    required this.currentCode,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    final isCurrent = currency.code.toUpperCase() == currentCode.toUpperCase();
+    final name = CurrencyDisplayName.resolve(
+      l10n,
+      currency.code,
+      fallback: currency.name,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.base),
+      child: Material(
+        color: colors.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          side: BorderSide(
+            color: isCurrent
+                ? colors.primary
+                : colors.surfaceContainerHighest.withValues(alpha: 0.5),
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              children: [
+                CurrencyFlag(code: currency.code, size: 40),
+                GGap.hMd,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GText(
+                        currency.code,
+                        style: AppTextStyles.numeralMd(),
+                      ),
+                      GText(
+                        name,
+                        style: AppTextStyles.bodyMd(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isCurrent)
+                  Icon(
+                    Icons.check_circle,
+                    color: colors.primary,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _StatCard extends StatelessWidget {
   final String label;
   final String value;
@@ -411,20 +721,22 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainer,
+          color: colors.surfaceContainer,
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-          border: Border.all(color: AppColors.surfaceContainerHighest),
+          border: Border.all(color: colors.surfaceContainerHighest),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GText(
               label,
-              style: AppTextStyles.labelSm(color: AppColors.onSurfaceVariant),
+              style: AppTextStyles.labelSm(color: colors.onSurfaceVariant),
             ),
             GGap.xs,
             GText(

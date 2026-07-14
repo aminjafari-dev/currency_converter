@@ -1,7 +1,6 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
@@ -64,10 +63,12 @@ class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
   BottomBarItem _item({
     required IconData icon,
     required String label,
+    required Color inactiveColor,
+    required Color activeColor,
   }) {
     return BottomBarItem(
-      inActiveItem: Icon(icon, color: AppColors.onSurface),
-      activeItem: Icon(icon, color: AppColors.onPrimaryFixed),
+      inActiveItem: Icon(icon, color: inactiveColor),
+      activeItem: Icon(icon, color: activeColor),
       itemLabel: label,
     );
   }
@@ -75,11 +76,12 @@ class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return AnimatedNotchBottomBar(
       notchBottomBarController: _controller,
-      color: AppColors.surfaceContainerHigh,
-      notchColor: AppColors.primaryFixed,
+      color: colors.surfaceContainerHigh,
+      notchColor: colors.primary,
       kIconSize: 24,
       kBottomRadius: AppSpacing.radiusXl,
       showLabel: true,
@@ -87,14 +89,29 @@ class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
       removeMargins: false,
       durationInMilliSeconds: 180,
       elevation: 0,
-      itemLabelStyle: const TextStyle(
-        color: AppColors.onSurface,
+      itemLabelStyle: TextStyle(
+        color: colors.onSurface,
         fontSize: 10,
       ),
       bottomBarItems: [
-        _item(icon: Icons.sync_alt, label: l10n.navConvert),
-        _item(icon: Icons.show_chart, label: l10n.navChart),
-        _item(icon: Icons.settings, label: l10n.navSettings),
+        _item(
+          icon: Icons.sync_alt,
+          label: l10n.navConvert,
+          inactiveColor: colors.onSurface,
+          activeColor: colors.onPrimary,
+        ),
+        _item(
+          icon: Icons.show_chart,
+          label: l10n.navChart,
+          inactiveColor: colors.onSurface,
+          activeColor: colors.onPrimary,
+        ),
+        _item(
+          icon: Icons.settings,
+          label: l10n.navSettings,
+          inactiveColor: colors.onSurface,
+          activeColor: colors.onPrimary,
+        ),
       ],
       onTap: widget.onTap,
     );

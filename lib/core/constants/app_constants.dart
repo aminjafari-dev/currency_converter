@@ -7,6 +7,7 @@ abstract final class AppConstants {
   static const String selectedCurrenciesKey = 'selected_currencies';
   static const String baseCurrencyKey = 'base_currency';
   static const String localeKey = 'app_locale';
+  static const String themeModeKey = 'app_theme_mode';
   static const String defaultBaseCurrency = 'USD';
 
   /// Oanor Iran Rial Market API gateway (free-market / bazaar IRR only).

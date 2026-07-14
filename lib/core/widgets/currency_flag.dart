@@ -1,8 +1,6 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 
-import 'package:currency_converter/core/theme/app_colors.dart';
-
 /// Circular flag avatar for a currency code.
 ///
 /// Uses `country_flags` [CountryFlag.fromCurrencyCode] so we do not need a
@@ -26,14 +24,15 @@ class CurrencyFlag extends StatelessWidget {
   Widget build(BuildContext context) {
     // IRT is synthetic (IRR ÷ 10) — reuse the Iranian flag from IRR.
     final flagCode = code.toUpperCase() == 'IRT' ? 'IRR' : code;
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.surfaceContainerHighest),
-        color: AppColors.surfaceContainerLow,
+        border: Border.all(color: colors.surfaceContainerHighest),
+        color: colors.surfaceContainerLow,
       ),
       clipBehavior: Clip.antiAlias,
       child: CountryFlag.fromCurrencyCode(

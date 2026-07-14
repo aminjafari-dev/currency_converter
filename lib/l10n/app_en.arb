@@ -8,6 +8,14 @@
   "@addCurrencyTitle": {
     "description": "Title of the Add Currency screen"
   },
+  "changeChartCurrency": "Change chart currency",
+  "@changeChartCurrency": {
+    "description": "Tooltip for tapping the chart header currency selector"
+  },
+  "chartCurrencyPickerTitle": "Select chart currency",
+  "@chartCurrencyPickerTitle": {
+    "description": "Title of the bottom sheet used to choose the chart currency"
+  },
   "searchCurrencyHint": "Search currency or country",
   "@searchCurrencyHint": {
     "description": "Placeholder in the currency search field"
@@ -107,6 +115,12 @@
   },
   "settingsEnglish": "English",
   "settingsPersian": "Persian",
+  "settingsTheme": "Theme",
+  "@settingsTheme": {
+    "description": "Theme row label in settings"
+  },
+  "settingsThemeDark": "Dark",
+  "settingsThemeLight": "Light",
   "settingsPlaceholder": "More settings coming soon.",
   "@settingsPlaceholder": {
     "description": "Placeholder body on the settings screen"

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:currency_converter/core/locale/locale_cubit.dart';
 import 'package:currency_converter/core/network/api_client.dart';
 import 'package:currency_converter/core/network/network_info.dart';
+import 'package:currency_converter/core/theme/app_theme_cubit.dart';
 import 'package:currency_converter/features/currency_catalog/currency_catalog_di.dart';
 import 'package:currency_converter/features/currency_detail/currency_detail_di.dart';
 import 'package:currency_converter/features/home_widget/home_widget_di.dart';
@@ -24,6 +25,7 @@ Future<void> setupLocator() async {
     () => NetworkInfoImpl(Connectivity()),
   );
   locator.registerLazySingleton(() => LocaleCubit(locator()));
+  locator.registerLazySingleton(() => AppThemeCubit(locator()));
 
   await setupRatesLocator(locator);
   await setupCurrencyCatalogLocator(locator);

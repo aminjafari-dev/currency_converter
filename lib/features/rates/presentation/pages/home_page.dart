@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
 import 'package:currency_converter/core/router/page_name.dart';
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/utils/currency_display_name.dart';
@@ -46,6 +45,7 @@ class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return GScaffold(
       appBar: AppBar(
@@ -64,11 +64,10 @@ class _HomeView extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
                 child: Tooltip(
-                  message:
-                      state.isEditing ? l10n.doneEditing : l10n.editList,
+                  message: state.isEditing ? l10n.doneEditing : l10n.editList,
                   child: Material(
                     color: state.isEditing
-                        ? AppColors.surfaceContainerHigh
+                        ? colors.surfaceContainerHigh
                         : Colors.transparent,
                     shape: const CircleBorder(),
                     child: InkWell(
@@ -84,7 +83,7 @@ class _HomeView extends StatelessWidget {
                         child: Icon(
                           // Check means "done editing"; pen means "enter edit mode".
                           state.isEditing ? Icons.check : Icons.edit_outlined,
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -102,7 +101,7 @@ class _HomeView extends StatelessWidget {
             child: Tooltip(
               message: l10n.addCurrencyAction,
               child: Material(
-                color: AppColors.primaryFixed,
+                color: colors.primary,
                 shape: const CircleBorder(),
                 child: InkWell(
                   customBorder: const CircleBorder(),
@@ -112,10 +111,10 @@ class _HomeView extends StatelessWidget {
                       context.read<HomeBloc>().add(const HomeEvent.started());
                     }
                   },
-                  child: const SizedBox(
+                  child: SizedBox(
                     width: 40,
                     height: 40,
-                    child: Icon(Icons.add, color: AppColors.onPrimaryFixed),
+                    child: Icon(Icons.add, color: colors.onPrimary),
                   ),
                 ),
               ),
@@ -127,8 +126,8 @@ class _HomeView extends StatelessWidget {
         builder: (context, state) {
           return state.load.when(
             initial: () => const SizedBox.shrink(),
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryFixed),
+            loading: () => Center(
+              child: CircularProgressIndicator(color: colors.primary),
             ),
             error: (message) => Center(
               child: Padding(
@@ -167,8 +166,8 @@ class _HomeView extends StatelessWidget {
                 notificationPredicate: state.isEditing
                     ? (_) => false
                     : defaultScrollNotificationPredicate,
-                color: AppColors.primaryFixed,
-                backgroundColor: AppColors.surfaceContainer,
+                color: colors.primary,
+                backgroundColor: colors.surfaceContainer,
                 onRefresh: () async {
                   context.read<HomeBloc>().add(const HomeEvent.refreshed());
                   await context.read<HomeBloc>().stream.firstWhere(
@@ -215,6 +214,7 @@ class _CurrencyList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -307,13 +307,13 @@ class _CurrencyList extends StatelessWidget {
                             horizontal: AppSpacing.md,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.errorContainer,
+                            color: colors.errorContainer,
                             borderRadius:
                                 BorderRadius.circular(AppSpacing.radiusXl),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.delete_outline,
-                            color: AppColors.onErrorContainer,
+                            color: colors.onErrorContainer,
                           ),
                         ),
                         onDismissed: (_) {
@@ -343,10 +343,10 @@ class _CurrencyList extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.sync,
                       size: 14,
-                      color: AppColors.onTertiaryContainer,
+                      color: colors.onSurfaceVariant,
                     ),
                     GGap.hXs,
                     GText(
@@ -357,7 +357,7 @@ class _CurrencyList extends StatelessWidget {
                         ),
                       ),
                       style: AppTextStyles.labelSm(
-                        color: AppColors.onTertiaryContainer,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -367,7 +367,7 @@ class _CurrencyList extends StatelessWidget {
                   width: 64,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerHighest,
+                    color: colors.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -375,7 +375,7 @@ class _CurrencyList extends StatelessWidget {
                 GText(
                   l10n.indicativeRatesDisclaimer,
                   style: AppTextStyles.labelSm(
-                    color: AppColors.onTertiaryContainer,
+                    color: colors.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),

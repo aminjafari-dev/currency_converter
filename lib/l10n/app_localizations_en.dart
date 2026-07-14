@@ -15,6 +15,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addCurrencyTitle => 'Add Currency';
 
   @override
+  String get changeChartCurrency => 'Change chart currency';
+
+  @override
+  String get chartCurrencyPickerTitle => 'Select chart currency';
+
+  @override
   String get searchCurrencyHint => 'Search currency or country';
 
   @override
@@ -97,6 +103,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPersian => 'Persian';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsThemeLight => 'Light';
 
   @override
   String get settingsPlaceholder => 'More settings coming soon.';

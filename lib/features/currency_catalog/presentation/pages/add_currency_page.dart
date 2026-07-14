@@ -4,7 +4,6 @@ import 'package:currency_converter/l10n/app_localizations.dart';
 
 import 'package:currency_converter/core/constants/app_constants.dart';
 import 'package:currency_converter/core/locator.dart';
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/utils/currency_display_name.dart';
@@ -38,6 +37,7 @@ class _AddCurrencyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return GScaffold(
       appBar: AppBar(
@@ -49,13 +49,13 @@ class _AddCurrencyView extends StatelessWidget {
           l10n.addCurrencyTitle,
           style: AppTextStyles.headlineMd(weight: FontWeight.w700),
         ),
-        actions: const [
+        actions: [
           // Directional `end` so trailing icon keeps screen-edge inset in RTL.
           Padding(
-            padding: EdgeInsetsDirectional.only(
+            padding: const EdgeInsetsDirectional.only(
               end: AppSpacing.containerMargin,
             ),
-            child: Icon(Icons.language, color: AppColors.primaryFixed),
+            child: Icon(Icons.language, color: colors.primary),
           ),
         ],
       ),
@@ -76,14 +76,14 @@ class _AddCurrencyView extends StatelessWidget {
               },
               // Far Homa when locale is `fa` so Persian search input matches UI copy.
               style: AppTextStyles.localize(
-                AppTextStyles.bodyMd(),
+                AppTextStyles.bodyMd(color: colors.onSurface),
                 Localizations.localeOf(context),
               ),
               decoration: InputDecoration(
                 hintText: l10n.searchCurrencyHint,
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.search,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
               ),
             ),
@@ -93,9 +93,9 @@ class _AddCurrencyView extends StatelessWidget {
               builder: (context, state) {
                 return state.load.when(
                   initial: () => const SizedBox.shrink(),
-                  loading: () => const Center(
+                  loading: () => Center(
                     child: CircularProgressIndicator(
-                      color: AppColors.primaryFixed,
+                      color: colors.primary,
                     ),
                   ),
                   error: (message) => Center(
@@ -147,9 +147,8 @@ class _AddCurrencyView extends StatelessWidget {
                     String? currentLetter;
                     var bucket = <Currency>[];
                     for (final c in alphabetical) {
-                      final letter = c.code.isNotEmpty
-                          ? c.code[0].toUpperCase()
-                          : '#';
+                      final letter =
+                          c.code.isNotEmpty ? c.code[0].toUpperCase() : '#';
                       if (currentLetter == null) {
                         currentLetter = letter;
                         bucket = [c];
@@ -216,13 +215,13 @@ class _AddCurrencyView extends StatelessWidget {
                                 GText(
                                   section.title.toUpperCase(),
                                   style: AppTextStyles.labelSm(
-                                    color: AppColors.onSurfaceVariant,
+                                    color: colors.onSurfaceVariant,
                                   ),
                                 ),
                                 GGap.hMd,
-                                const Expanded(
+                                Expanded(
                                   child: Divider(
-                                    color: AppColors.surfaceContainerHighest,
+                                    color: colors.surfaceContainerHighest,
                                   ),
                                 ),
                               ],
@@ -281,15 +280,16 @@ class _CurrencyCatalogTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.base),
       child: Material(
-        color: AppColors.surfaceContainer,
+        color: colors.surfaceContainer,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
           side: BorderSide(
-            color: AppColors.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
           ),
         ),
         child: InkWell(
@@ -319,14 +319,13 @@ class _CurrencyCatalogTile extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryFixed
-                                    .withValues(alpha: 0.10),
+                                color: colors.primary.withValues(alpha: 0.10),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: GText(
                                 trendingLabel,
                                 style: AppTextStyles.labelSm(
-                                  color: AppColors.primaryFixed,
+                                  color: colors.primary,
                                 ),
                               ),
                             ),
@@ -340,7 +339,7 @@ class _CurrencyCatalogTile extends StatelessWidget {
                           fallback: currency.name,
                         ),
                         style: AppTextStyles.bodyMd(
-                          color: AppColors.onSurfaceVariant,
+                          color: colors.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -351,16 +350,12 @@ class _CurrencyCatalogTile extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected
-                        ? AppColors.primaryFixed
-                        : Colors.transparent,
-                    border: Border.all(color: AppColors.primaryFixed),
+                    color: isSelected ? colors.primary : Colors.transparent,
+                    border: Border.all(color: colors.primary),
                   ),
                   child: Icon(
                     isSelected ? Icons.check : Icons.add,
-                    color: isSelected
-                        ? AppColors.onPrimaryFixed
-                        : AppColors.primaryFixed,
+                    color: isSelected ? colors.onPrimary : colors.primary,
                   ),
                 ),
               ],

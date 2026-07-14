@@ -3,14 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
 import 'package:currency_converter/core/locale/locale_cubit.dart';
-import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
+import 'package:currency_converter/core/theme/app_theme_cubit.dart';
+import 'package:currency_converter/core/theme/app_theme_mode.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
 
-/// Minimal Settings placeholder with language switcher (en / fa).
+/// Settings tab with language and visual theme selectors.
 ///
 /// Hosted inside [MainShellPage]; the shell owns the bottom navigation bar.
 class SettingsPage extends StatelessWidget {
@@ -19,6 +20,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
 
     return GScaffold(
       appBar: AppBar(
@@ -34,14 +36,14 @@ class SettingsPage extends StatelessWidget {
           children: [
             GText(
               l10n.settingsLanguage,
-              style: AppTextStyles.labelSm(color: AppColors.onSurfaceVariant),
+              style: AppTextStyles.labelSm(color: colors.onSurfaceVariant),
             ),
             GGap.sm,
             BlocBuilder<LocaleCubit, Locale>(
               builder: (context, locale) {
                 return Row(
                   children: [
-                    _LangChip(
+                    _SettingsChip(
                       label: l10n.settingsEnglish,
                       selected: locale.languageCode == 'en',
                       onTap: () => context
@@ -49,7 +51,7 @@ class SettingsPage extends StatelessWidget {
                           .setLocale(const Locale('en')),
                     ),
                     GGap.hSm,
-                    _LangChip(
+                    _SettingsChip(
                       label: l10n.settingsPersian,
                       selected: locale.languageCode == 'fa',
                       onTap: () => context
@@ -62,14 +64,38 @@ class SettingsPage extends StatelessWidget {
             ),
             GGap.xl,
             GText(
-              l10n.settingsPlaceholder,
-              style: AppTextStyles.bodyMd(color: AppColors.onSurfaceVariant),
+              l10n.settingsTheme,
+              style: AppTextStyles.labelSm(color: colors.onSurfaceVariant),
+            ),
+            GGap.sm,
+            BlocBuilder<AppThemeCubit, AppThemeMode>(
+              builder: (context, mode) {
+                return Row(
+                  children: [
+                    _SettingsChip(
+                      label: l10n.settingsThemeDark,
+                      selected: mode == AppThemeMode.dark,
+                      onTap: () => context
+                          .read<AppThemeCubit>()
+                          .setTheme(AppThemeMode.dark),
+                    ),
+                    GGap.hSm,
+                    _SettingsChip(
+                      label: l10n.settingsThemeLight,
+                      selected: mode == AppThemeMode.light,
+                      onTap: () => context
+                          .read<AppThemeCubit>()
+                          .setTheme(AppThemeMode.light),
+                    ),
+                  ],
+                );
+              },
             ),
             GGap.lg,
             GText(
               l10n.indicativeRatesDisclaimer,
               style: AppTextStyles.labelSm(
-                color: AppColors.onTertiaryContainer,
+                color: colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -79,12 +105,12 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-class _LangChip extends StatelessWidget {
+class _SettingsChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
-  const _LangChip({
+  const _SettingsChip({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -92,6 +118,8 @@ class _LangChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -100,20 +128,16 @@ class _LangChip extends StatelessWidget {
           vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryFixed : AppColors.surfaceContainer,
+          color: selected ? colors.primary : colors.surfaceContainer,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
-            color: selected
-                ? AppColors.primaryFixed
-                : AppColors.surfaceContainerHighest,
+            color: selected ? colors.primary : colors.surfaceContainerHighest,
           ),
         ),
         child: GText(
           label,
           style: AppTextStyles.labelSm(
-            color: selected
-                ? AppColors.onPrimaryFixed
-                : AppColors.onSurfaceVariant,
+            color: selected ? colors.onPrimary : colors.onSurfaceVariant,
           ),
         ),
       ),
