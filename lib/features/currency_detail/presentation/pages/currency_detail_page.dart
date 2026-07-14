@@ -67,6 +67,118 @@ class _DetailView extends StatelessWidget {
     }
   }
 
+  /// Splits chart points around the first visible price baseline.
+  ///
+  /// Example: if a segment moves from above the opening price to below it, this
+  /// inserts the exact crossing spot so the red/primary color changes on the
+  /// baseline instead of at the next data point.
+  ({List<FlSpot> above, List<FlSpot> below}) _splitSpotsByBaseline(
+    List<FlSpot> spots,
+    double baseline,
+  ) {
+    final above = <FlSpot>[];
+    final below = <FlSpot>[];
+
+    for (var i = 0; i < spots.length - 1; i++) {
+      final start = spots[i];
+      final end = spots[i + 1];
+      final startSide = _baselineSide(start.y, baseline);
+      final endSide = _baselineSide(end.y, baseline);
+
+      if (startSide == endSide) {
+        _appendBaselineSegment(
+          startSide < 0 ? below : above,
+          start,
+          end,
+        );
+        continue;
+      }
+
+      if (startSide == 0) {
+        _appendBaselineSegment(endSide < 0 ? below : above, start, end);
+        continue;
+      }
+
+      if (endSide == 0) {
+        _appendBaselineSegment(startSide < 0 ? below : above, start, end);
+        continue;
+      }
+
+      final crossing = _baselineCrossingSpot(start, end, baseline);
+      _appendBaselineSegment(
+        startSide < 0 ? below : above,
+        start,
+        crossing,
+      );
+      _appendBaselineSegment(
+        endSide < 0 ? below : above,
+        crossing,
+        end,
+      );
+    }
+
+    return (above: above, below: below);
+  }
+
+  /// Returns where [price] sits compared with the opening chart price.
+  ///
+  /// Example: `-1` means this point belongs to the red below-baseline path.
+  int _baselineSide(double price, double baseline) {
+    if (price < baseline) return -1;
+    if (price > baseline) return 1;
+    return 0;
+  }
+
+  /// Finds the exact point where a segment crosses the opening price baseline.
+  ///
+  /// Example: a line from `100` to `90` with baseline `95` produces the middle
+  /// x position, letting each half of the visual segment use its own color.
+  FlSpot _baselineCrossingSpot(FlSpot start, FlSpot end, double baseline) {
+    final progress = (baseline - start.y) / (end.y - start.y);
+    final x = start.x + ((end.x - start.x) * progress);
+    return FlSpot(x, baseline);
+  }
+
+  /// Adds a segment and keeps adjacent same-color pieces connected.
+  ///
+  /// Example: consecutive points above the baseline stay one continuous primary
+  /// line, while separated sections receive [FlSpot.nullSpot] gaps.
+  void _appendBaselineSegment(
+    List<FlSpot> target,
+    FlSpot start,
+    FlSpot end,
+  ) {
+    if (target.isNotEmpty && target.last == start) {
+      target.add(end);
+      return;
+    }
+
+    if (target.isNotEmpty) {
+      target.add(FlSpot.nullSpot);
+    }
+    target.addAll([start, end]);
+  }
+
+  /// Creates one colored chart path for either side of the opening baseline.
+  ///
+  /// Example: pass below-baseline spots with `colors.error` to draw only the
+  /// negative sections in red.
+  LineChartBarData _baselineLineData({
+    required List<FlSpot> spots,
+    required Color color,
+  }) {
+    return LineChartBarData(
+      spots: spots,
+      isCurved: false,
+      color: color,
+      barWidth: 3,
+      dotData: const FlDotData(show: false),
+      isStrokeCapRound: true,
+      isStrokeJoinRound: true,
+      belowBarData: BarAreaData(show: false),
+    );
+  }
+
   /// Opens the chart currency picker and reloads [DetailBloc] with the chosen
   /// quote currency while keeping the current base.
   ///
@@ -146,6 +258,10 @@ class _DetailView extends StatelessWidget {
               snapshot,
             ) {
               final up = todayPercent >= 0;
+              // The chart color follows the selected range, not only today's
+              // last-point change, so a down range is red across the graph.
+              final chartColor =
+                  stats.percentChange >= 0 ? colors.primary : colors.error;
               final spots = <FlSpot>[];
               for (var i = 0; i < series.points.length; i++) {
                 spots.add(FlSpot(i.toDouble(), series.points[i].rate));
@@ -311,7 +427,7 @@ class _DetailView extends StatelessWidget {
                                             return LineTooltipItem(
                                               t.y.toStringAsFixed(3),
                                               AppTextStyles.numeralMd(
-                                                color: colors.primary,
+                                                color: chartColor,
                                               ),
                                             );
                                           }).toList();
@@ -322,7 +438,7 @@ class _DetailView extends StatelessWidget {
                                       LineChartBarData(
                                         spots: spots,
                                         isCurved: true,
-                                        color: colors.primary,
+                                        color: chartColor,
                                         barWidth: 3,
                                         dotData: const FlDotData(show: false),
                                         belowBarData: BarAreaData(
@@ -331,10 +447,8 @@ class _DetailView extends StatelessWidget {
                                             begin: Alignment.topCenter,
                                             end: Alignment.bottomCenter,
                                             colors: [
-                                              colors.primary
-                                                  .withValues(alpha: 0.2),
-                                              colors.primary
-                                                  .withValues(alpha: 0.0),
+                                              chartColor.withValues(alpha: 0.2),
+                                              chartColor.withValues(alpha: 0.0),
                                             ],
                                           ),
                                         ),
@@ -416,7 +530,7 @@ class _DetailView extends StatelessWidget {
                               label: l10n.statPercentChange,
                               value:
                                   '${stats.percentChange >= 0 ? '+' : ''}${stats.percentChange.toStringAsFixed(1)}%',
-                              valueColor: colors.primary,
+                              valueColor: chartColor,
                             ),
                           ],
                         ),
