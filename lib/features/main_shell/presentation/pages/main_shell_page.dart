@@ -105,9 +105,9 @@ class _MainShellPageState extends State<MainShellPage> {
         body: IndexedStack(
           index: _currentIndex,
           children: const [
-            // embedded: reuse shell BLoCs; do not create nested providers.
-            HomePage(embedded: true),
-            CurrencyDetailPage(embedded: true),
+            // Tab bodies reuse shell BLoCs; do not create nested providers.
+            HomePage(),
+            CurrencyDetailPage(),
             SettingsPage(),
           ],
         ),

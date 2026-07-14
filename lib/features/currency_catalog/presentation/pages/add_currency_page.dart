@@ -50,8 +50,11 @@ class _AddCurrencyView extends StatelessWidget {
           style: AppTextStyles.headlineMd(weight: FontWeight.w700),
         ),
         actions: const [
+          // Directional `end` so trailing icon keeps screen-edge inset in RTL.
           Padding(
-            padding: EdgeInsets.only(right: AppSpacing.containerMargin),
+            padding: EdgeInsetsDirectional.only(
+              end: AppSpacing.containerMargin,
+            ),
             child: Icon(Icons.language, color: AppColors.primaryFixed),
           ),
         ],

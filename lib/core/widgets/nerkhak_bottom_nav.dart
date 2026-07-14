@@ -47,8 +47,10 @@ class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
   @override
   void didUpdateWidget(covariant NerkhakBottomNav oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Animate the notch when the shell updates the selected tab index.
-    if (oldWidget.currentIndex != widget.currentIndex) {
+    // External index changes should move the notch, but user taps are already
+    // handled inside AnimatedNotchBottomBar before the shell rebuilds.
+    if (oldWidget.currentIndex != widget.currentIndex &&
+        _controller.index != widget.currentIndex) {
       _controller.jumpTo(widget.currentIndex);
     }
   }
@@ -64,7 +66,7 @@ class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
     required String label,
   }) {
     return BottomBarItem(
-      inActiveItem: Icon(icon, color: AppColors.onSurfaceVariant),
+      inActiveItem: Icon(icon, color: AppColors.onSurface),
       activeItem: Icon(icon, color: AppColors.onPrimaryFixed),
       itemLabel: label,
     );
@@ -76,17 +78,17 @@ class _NerkhakBottomNavState extends State<NerkhakBottomNav> {
 
     return AnimatedNotchBottomBar(
       notchBottomBarController: _controller,
-      color: AppColors.surfaceContainerLowest,
+      color: AppColors.surfaceContainerHigh,
       notchColor: AppColors.primaryFixed,
       kIconSize: 24,
       kBottomRadius: AppSpacing.radiusXl,
       showLabel: true,
       showShadow: false,
       removeMargins: false,
-      durationInMilliSeconds: 300,
+      durationInMilliSeconds: 180,
       elevation: 0,
       itemLabelStyle: const TextStyle(
-        color: AppColors.onSurfaceVariant,
+        color: AppColors.onSurface,
         fontSize: 10,
       ),
       bottomBarItems: [

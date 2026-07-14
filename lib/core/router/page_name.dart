@@ -11,8 +11,7 @@
 abstract final class PageName {
   /// Main shell (Convert / Chart / Settings tabs).
   static const String home = '/home';
-  static const String addCurrency = '/addCurrency';
 
-  /// Standalone chart route (optional deep link); prefer the Chart tab in shell.
-  static const String currencyDetail = '/currencyDetail';
+  /// Push route to pick and add a currency to the home list.
+  static const String addCurrency = '/addCurrency';
 }

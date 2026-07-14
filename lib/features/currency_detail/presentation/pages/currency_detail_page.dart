@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:currency_converter/l10n/app_localizations.dart';
 
-import 'package:currency_converter/core/locator.dart';
-import 'package:currency_converter/core/router/route_args.dart';
 import 'package:currency_converter/core/theme/app_colors.dart';
 import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
@@ -19,45 +17,20 @@ import 'package:currency_converter/features/currency_detail/presentation/bloc/de
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_event.dart';
 import 'package:currency_converter/features/currency_detail/presentation/bloc/detail_state.dart';
 
-/// Currency Detail & Chart screen matching Stitch `02_currency_detail_chart`.
+/// Currency Detail & Chart tab body (Stitch `02_currency_detail_chart`).
 ///
-/// When [embedded] is true, a parent (e.g. [MainShellPage]) already provides
-/// [DetailBloc] — do not create another provider or require [args].
+/// Expects an ancestor [DetailBloc] from [MainShellPage] — never create one
+/// here so the Chart tab stays alive in the shell [IndexedStack].
 ///
 /// Example:
 /// ```dart
-/// CurrencyDetailPage(args: CurrencyDetailArgs(code: 'EUR', baseCode: 'USD'));
-/// const CurrencyDetailPage(embedded: true);
+/// const CurrencyDetailPage();
 /// ```
 class CurrencyDetailPage extends StatelessWidget {
-  final CurrencyDetailArgs? args;
-
-  /// When true, reuse an ancestor [DetailBloc] instead of creating one.
-  final bool embedded;
-
-  const CurrencyDetailPage({
-    super.key,
-    this.args,
-    this.embedded = false,
-  });
+  const CurrencyDetailPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    if (embedded) return const _DetailView();
-
-    final detailArgs =
-        args ?? const CurrencyDetailArgs(code: 'EUR', baseCode: 'USD');
-    return BlocProvider(
-      create: (_) => locator<DetailBloc>()
-        ..add(
-          DetailEvent.started(
-            code: detailArgs.code,
-            baseCode: detailArgs.baseCode,
-          ),
-        ),
-      child: const _DetailView(),
-    );
-  }
+  Widget build(BuildContext context) => const _DetailView();
 }
 
 class _DetailView extends StatelessWidget {
@@ -126,13 +99,11 @@ class _DetailView extends StatelessWidget {
 
               return CustomScrollView(
                 slivers: [
+                  // No leading back — Chart is a shell tab, not a pushed route.
                   SliverAppBar(
                     pinned: true,
                     backgroundColor: AppColors.background,
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
+                    automaticallyImplyLeading: false,
                     title: Row(
                       children: [
                         CurrencyFlag(code: code, size: 24),

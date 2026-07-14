@@ -25,15 +25,3 @@ class RefreshRates implements UseCase<RateSnapshot, GetLatestRatesParams> {
     );
   }
 }
-
-/// Reads the last successful cache timestamp.
-class GetLastUpdatedAt implements UseCase<DateTime?, NoParams> {
-  final RatesRepository repository;
-
-  GetLastUpdatedAt(this.repository);
-
-  @override
-  Future<Either<Failure, DateTime?>> call(NoParams params) {
-    return repository.getLastUpdatedAt();
-  }
-}

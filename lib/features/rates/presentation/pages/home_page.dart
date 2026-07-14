@@ -13,7 +13,6 @@ import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
-import 'package:currency_converter/core/locator.dart';
 import 'package:currency_converter/features/rates/domain/entities/currency.dart';
 import 'package:currency_converter/features/rates/domain/entities/selected_currency.dart';
 import 'package:currency_converter/features/rates/presentation/bloc/home_bloc.dart';
@@ -21,36 +20,24 @@ import 'package:currency_converter/features/rates/presentation/bloc/home_event.d
 import 'package:currency_converter/features/rates/presentation/bloc/home_state.dart';
 import 'package:currency_converter/features/rates/presentation/widgets/currency_row.dart';
 
-/// Home – Currency List screen matching Stitch `01_home_currency_list`.
+/// Convert tab body – currency list (Stitch `01_home_currency_list`).
 ///
 /// Tap any currency to edit its amount; siblings update via local conversion.
 /// Tap the pen icon to enter edit mode — each card shows remove + drag handles.
 /// Swipe a row (outside edit mode) to remove it. Long-press sets the base.
 ///
-/// When [embedded] is true, a parent (e.g. [MainShellPage]) already provides
-/// [HomeBloc] — do not create another provider.
+/// Expects an ancestor [HomeBloc] from [MainShellPage] — never create one here
+/// so the Convert tab stays alive in the shell [IndexedStack].
 ///
 /// Example:
 /// ```dart
-/// // Standalone route
 /// const HomePage();
-/// // Inside MainShellPage IndexedStack
-/// const HomePage(embedded: true);
 /// ```
 class HomePage extends StatelessWidget {
-  /// When true, reuse an ancestor [HomeBloc] instead of creating one.
-  final bool embedded;
-
-  const HomePage({super.key, this.embedded = false});
+  const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    if (embedded) return const _HomeView();
-    return BlocProvider(
-      create: (_) => locator<HomeBloc>()..add(const HomeEvent.started()),
-      child: const _HomeView(),
-    );
-  }
+  Widget build(BuildContext context) => const _HomeView();
 }
 
 class _HomeView extends StatelessWidget {
@@ -72,8 +59,10 @@ class _HomeView extends StatelessWidget {
           BlocBuilder<HomeBloc, HomeState>(
             buildWhen: (prev, next) => prev.isEditing != next.isEditing,
             builder: (context, state) {
+              // Use `end` (not physical `right`) so RTL (fa) keeps space from
+              // the screen edge — AppBar actions flip to the start side in RTL.
               return Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
                 child: Tooltip(
                   message:
                       state.isEditing ? l10n.doneEditing : l10n.editList,
@@ -105,8 +94,11 @@ class _HomeView extends StatelessWidget {
             },
           ),
           // Add currency — filled lime circle (always available).
+          // Directional `end` padding mirrors LTR trailing margin in Persian RTL.
           Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.containerMargin),
+            padding: const EdgeInsetsDirectional.only(
+              end: AppSpacing.containerMargin,
+            ),
             child: Tooltip(
               message: l10n.addCurrencyAction,
               child: Material(

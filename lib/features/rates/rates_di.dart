@@ -57,7 +57,6 @@ Future<void> setupRatesLocator(GetIt locator) async {
   locator.registerLazySingleton(() => ReorderSelectedCurrencies(locator()));
   locator.registerLazySingleton(() => SetBaseCurrency(locator()));
   locator.registerLazySingleton(() => RefreshRates(locator()));
-  locator.registerLazySingleton(() => GetLastUpdatedAt(locator()));
 
   // BLoC — always factory
   locator.registerFactory(
