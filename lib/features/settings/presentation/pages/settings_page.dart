@@ -7,6 +7,7 @@ import 'package:currency_converter/core/theme/app_spacing.dart';
 import 'package:currency_converter/core/theme/app_theme_cubit.dart';
 import 'package:currency_converter/core/theme/app_theme_mode.dart';
 import 'package:currency_converter/core/theme/app_text_styles.dart';
+import 'package:currency_converter/core/widgets/app_logo.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
 import 'package:currency_converter/core/widgets/g_text.dart';
@@ -96,6 +97,18 @@ class SettingsPage extends StatelessWidget {
               l10n.indicativeRatesDisclaimer,
               style: AppTextStyles.labelSm(
                 color: colors.onSurfaceVariant,
+              ),
+            ),
+            GGap.xl,
+            // Brand footer — reinforces identity under settings options.
+            const Center(
+              child: AppLogo(size: 56, borderRadius: AppSpacing.radiusXl),
+            ),
+            GGap.sm,
+            Center(
+              child: GText(
+                l10n.appName,
+                style: AppTextStyles.labelSm(color: colors.onSurfaceVariant),
               ),
             ),
           ],

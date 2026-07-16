@@ -8,6 +8,7 @@ import 'package:currency_converter/core/theme/app_text_styles.dart';
 import 'package:currency_converter/core/utils/currency_display_name.dart';
 import 'package:currency_converter/core/utils/currency_formatter.dart';
 import 'package:currency_converter/core/utils/relative_time_formatter.dart';
+import 'package:currency_converter/core/widgets/app_logo.dart';
 import 'package:currency_converter/core/widgets/g_button.dart';
 import 'package:currency_converter/core/widgets/g_gap.dart';
 import 'package:currency_converter/core/widgets/g_scaffold.dart';
@@ -49,9 +50,18 @@ class _HomeView extends StatelessWidget {
 
     return GScaffold(
       appBar: AppBar(
-        title: GText(
-          l10n.appName.toUpperCase(),
-          style: AppTextStyles.headlineMd(weight: FontWeight.w800),
+        // Brand-first title: logo mark + app name (matches launcher icon).
+        title: Row(
+          children: [
+            const AppLogo(size: 32),
+            GGap.hSm,
+            Flexible(
+              child: GText(
+                l10n.appName.toUpperCase(),
+                style: AppTextStyles.headlineMd(weight: FontWeight.w800),
+              ),
+            ),
+          ],
         ),
         actions: [
           // Pen / done — toggles list-edit mode (remove + drag on each card).
