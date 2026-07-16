@@ -2,16 +2,16 @@ import 'package:currency_converter/core/constants/app_constants.dart';
 import 'package:currency_converter/features/rates/data/models/historical_series_model.dart';
 import 'package:currency_converter/features/rates/data/models/rate_snapshot_model.dart';
 
-/// Pure helpers that replace Frankfurter’s official IRR with Oanor bazaar IRR.
+/// Pure helpers that replace Frankfurter’s official IRR with free-market IRR.
 ///
-/// [foreignToIrr] maps ISO code → IRR for 1 unit of that foreign currency
-/// (already JPY-normalized by the Oanor data source).
+/// [foreignToIrr] maps ISO code → IRR for 1 unit of that foreign currency.
+/// The Drive feed typically supplies only `USD`; other bases triangulate via USD.
 ///
 /// Example:
 /// ```dart
 /// final overlayed = overlayIrrOnSnapshot(
 ///   frankfurter: snapshot,
-///   foreignToIrr: {'USD': 1816200, 'EUR': 2076800},
+///   foreignToIrr: {'USD': 1816200},
 /// );
 /// ```
 RateSnapshotModel overlayIrrOnSnapshot({
@@ -29,7 +29,7 @@ RateSnapshotModel overlayIrrOnSnapshot({
       rates[entry.key] = 1.0 / irrPerForeign;
     }
 
-    // Currencies Oanor does not list: bridge via USD using Frankfurter cross.
+    // Currencies not in the feed: bridge via USD using Frankfurter cross.
     // Useful so AMD/OMR/… still convert when the Home base is IRR.
     final usdIrr = foreignToIrr['USD'];
     final frankUsd = frankfurter.rates['USD'];
@@ -67,9 +67,9 @@ RateSnapshotModel overlayIrrOnSnapshot({
   );
 }
 
-/// Builds a base↔IRR historical series from an Oanor foreign→IRR history.
+/// Builds a base↔IRR historical series from a foreign→IRR history feed.
 ///
-/// When [baseIsIrr] is true, each point is inverted (1 IRR = 1/close foreign).
+/// When [invertToIrrBase] is true, each point is inverted (1 IRR = 1/close foreign).
 HistoricalSeriesModel overlayIrrOnHistory({
   required HistoricalSeriesModel foreignToIrrHistory,
   required String base,
@@ -106,11 +106,11 @@ double? _irrPerOneUnitOf({
   required Map<String, double> rates,
   required Map<String, double> foreignToIrr,
 }) {
-  // Direct hit — Oanor lists this currency vs IRR.
+  // Direct hit — feed lists this currency vs IRR (e.g. USD).
   final direct = foreignToIrr[base];
   if (direct != null && direct > 0) return direct;
 
-  // Triangular: 1 base → USD (Frankfurter) → IRR (Oanor).
+  // Triangular: 1 base → USD (Frankfurter) → IRR (Drive feed).
   final usdIrr = foreignToIrr['USD'];
   if (usdIrr == null || usdIrr <= 0) return null;
 

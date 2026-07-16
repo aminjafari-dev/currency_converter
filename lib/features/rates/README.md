@@ -2,7 +2,7 @@
 
 ## Description
 
-The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative reference rates from **Frankfurter** for global currencies, overlays **free-market Iranian Rial (IRR)** from the **Oanor Iran Rial Market API**, caches snapshots locally, persists the user's selected currency list, and hosts the Home (Currency List) presentation layer. Other features depend only on this feature's **domain** layer (entities + use cases), never on its data models.
+The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative reference rates from **Frankfurter** for global currencies, overlays **free-market Iranian Rial (IRR)** from a **public Google Drive JSON feed** (USD→IRR only; other pairs triangulated via USD), caches snapshots locally, persists the user's selected currency list, and hosts the Home (Currency List) presentation layer. Other features depend only on this feature's **domain** layer (entities + use cases), never on its data models.
 
 ## Architecture
 
@@ -16,9 +16,10 @@ The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative
   - `usecases/` — `GetLatestRates`, `GetHistoricalSeries`, `GetSupportedCurrencies`, `ConvertAmount`, selection use cases, `RefreshRates`
 - **Data**
   - `datasources/remote/frankfurter_remote_data_source.dart` — Frankfurter v2 HTTP (global FX)
-  - `datasources/remote/oanor_irr_remote_data_source.dart` — Oanor irr-api (bazaar IRR only)
+  - `datasources/remote/iran_irr_remote_data_source.dart` — IRR feed contract
+  - `datasources/remote/drive_irr_remote_data_source.dart` — Google Drive JSON (USD→IRR)
   - `datasources/local/rates_local_data_source.dart` — SharedPreferences cache
-  - `utils/irr_rate_overlay.dart` — pure Frankfurter + Oanor merge helpers
+  - `utils/irr_rate_overlay.dart` — pure Frankfurter + Drive IRR merge helpers
   - `models/` — DTOs with `toDomain()`
   - `repositories/rates_repository_impl.dart` — cache-first / offline fallback + IRR overlay
 - **Presentation**
@@ -29,8 +30,8 @@ The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative
 ## Use Cases
 
 1. **Use Case:** `GetLatestRates`  
-   **Description:** Loads the latest FX snapshot for a base; IRR is replaced with Oanor bazaar rate when available.  
-   **Data Flow:** `HomePage -> HomeBloc -> GetLatestRates -> RatesRepository -> FrankfurterRemoteDataSource + OanorIrrRemoteDataSource / RatesLocalDataSource`
+   **Description:** Loads the latest FX snapshot for a base; IRR is replaced with the newest Drive USD→IRR rate when available.  
+   **Data Flow:** `HomePage -> HomeBloc -> GetLatestRates -> RatesRepository -> FrankfurterRemoteDataSource + IranIrrRemoteDataSource / RatesLocalDataSource`
 
 2. **Use Case:** `ConvertAmount`  
    **Description:** Pure triangular conversion using a snapshot rate map.  
@@ -44,7 +45,7 @@ The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative
 
 1. User opens Home → `HomeEvent.started`
 2. BLoC loads selected currencies + catalog + latest rates
-3. Repository fetches Frankfurter, then overlays IRR from Oanor (`/v1/currencies`)
+3. Repository fetches Frankfurter, then overlays IRR from the Drive JSON feed
 4. Amounts are converted locally from the snapshot
 5. User taps any currency row → keyboard opens; typing dispatches `amountChanged(code, amount)`
 6. BLoC realigns every other currency via `ConvertAmount` on the cached snapshot (no network)
@@ -58,11 +59,11 @@ The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative
 ## IRR source notes
 
 - Frankfurter IRR is an official/reference-style rate and is **not** Iran’s free-market rate.
-- Oanor exposes bazaar prices (TGJU-backed) in IRR (and toman).
-- If Oanor returns `subscription_required` (key not subscribed on the marketplace), the app falls back to **TGJU** (same free-market source) so IRR is never left on Frankfurter’s ~1.37M rate.
+- Free-market USD→IRR comes from a public Google Drive JSON (`AppConstants.usdIrrDriveFeedUrl`).
+- Template / local copy: `rates_feed/usd_irr_rates.json` (append `{ "at", "rate" }` rows when updating).
+- Other currencies vs IRR are triangulated: `(foreign→USD from Frankfurter) × (USD→IRR from Drive)`.
 - Synthetic **IRT** (Iranian Toman) is derived locally as `IRR / 10` (1 Toman = 10 Rial). No extra API.
-- Charts for pairs involving IRR/IRT use Oanor `/v1/history` when possible; otherwise TGJU history for the same foreign codes.
-- API key: `AppConstants.oanorApiKey` (override with `--dart-define=OANOR_API_KEY=…`). Subscribe the key to **Iran Rial Market API** on [oanor.com](https://www.oanor.com/api/irr-api) (click **Subscribe** on the Free plan).
+- Charts for pairs involving IRR/IRT use Drive USD history (and Frankfurter cross rates for non-USD legs).
 
 ## Key Components
 
@@ -70,7 +71,7 @@ The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative
 - `flutter_bloc` + `freezed`
 - Dartz `Either<Failure, T>`
 - Dio + Frankfurter v2 (~165 active currencies)
-- Dio + Oanor irr-api (IRR overlay only)
+- Dio + Google Drive JSON (USD→IRR overlay only)
 - SharedPreferences cache
 - GetIt feature DI
 - `SliverReorderableList` for Home list edit mode

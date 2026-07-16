@@ -121,8 +121,8 @@ void main() {
   });
 
   group('overlayIrrOnSnapshot', () {
-    test('replaces IRR when base is USD using Oanor USD close', () {
-      // Given: Frankfurter official IRR + Oanor free-market USD→IRR
+    test('replaces IRR when base is USD using Drive USD close', () {
+      // Given: Frankfurter official IRR + Drive free-market USD→IRR
       final frankfurter = RateSnapshotModel.fromJson({
         'base': 'USD',
         'date': '2026-07-12',
@@ -135,12 +135,12 @@ void main() {
         foreignToIrr: const {'USD': 1816200, 'EUR': 2076800},
       );
 
-      // Then: IRR comes from Oanor; other quotes stay Frankfurter
+      // Then: IRR comes from the feed; other quotes stay Frankfurter
       expect(overlayed.rates['IRR'], 1816200);
       expect(overlayed.rates['EUR'], 0.92);
     });
 
-    test('uses direct Oanor EUR close when base is EUR', () {
+    test('uses direct feed EUR close when base is EUR', () {
       final frankfurter = RateSnapshotModel.fromJson({
         'base': 'EUR',
         'date': '2026-07-12',
@@ -155,8 +155,8 @@ void main() {
       expect(overlayed.rates['IRR'], 2076800);
     });
 
-    test('bridges via USD when base is not listed by Oanor', () {
-      // Given: AMD base — Oanor has no AMD row, so 1 AMD → USD → IRR
+    test('bridges via USD when base is not listed in the feed', () {
+      // Given: AMD base — feed has only USD, so 1 AMD → USD → IRR
       final frankfurter = RateSnapshotModel.fromJson({
         'base': 'AMD',
         'date': '2026-07-12',
@@ -171,7 +171,7 @@ void main() {
       expect(overlayed.rates['IRR'], closeTo(0.0025 * 1816200, 0.01));
     });
 
-    test('inverts Oanor closes when base is IRR', () {
+    test('inverts feed closes when base is IRR', () {
       final frankfurter = RateSnapshotModel.fromJson({
         'base': 'IRR',
         'date': '2026-07-12',

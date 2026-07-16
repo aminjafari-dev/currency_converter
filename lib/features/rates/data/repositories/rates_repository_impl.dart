@@ -6,7 +6,7 @@ import 'package:currency_converter/core/error/failures.dart';
 import 'package:currency_converter/core/network/network_info.dart';
 import 'package:currency_converter/features/rates/data/datasources/local/rates_local_data_source.dart';
 import 'package:currency_converter/features/rates/data/datasources/remote/frankfurter_remote_data_source.dart';
-import 'package:currency_converter/features/rates/data/datasources/remote/oanor_irr_remote_data_source.dart';
+import 'package:currency_converter/features/rates/data/datasources/remote/iran_irr_remote_data_source.dart';
 import 'package:currency_converter/features/rates/data/models/currency_model.dart';
 import 'package:currency_converter/features/rates/data/models/historical_series_model.dart';
 import 'package:currency_converter/features/rates/data/models/rate_snapshot_model.dart';
@@ -19,20 +19,21 @@ import 'package:currency_converter/features/rates/domain/repositories/rates_repo
 
 /// Concrete [RatesRepository] — single source of truth for rates + selection.
 ///
-/// Online: Frankfurter for global FX, Oanor overlay for free-market IRR,
-/// then cache → domain entities. Offline: cached entities or failures.
+/// Online: Frankfurter for global FX, Drive JSON overlay for free-market IRR
+/// (USD→IRR, other pairs triangulated), then cache → domain entities.
+/// Offline: cached entities or failures.
 ///
 /// Example: `repository.getLatestRates(base: 'USD')` returns a snapshot whose
-/// `rates['IRR']` comes from Oanor when the marketplace key is subscribed.
+/// `rates['IRR']` comes from the newest Drive feed update.
 class RatesRepositoryImpl implements RatesRepository {
   final RatesRemoteDataSource remoteDataSource;
-  final OanorIrrRemoteDataSource oanorIrrRemoteDataSource;
+  final IranIrrRemoteDataSource iranIrrRemoteDataSource;
   final RatesLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
 
   RatesRepositoryImpl({
     required this.remoteDataSource,
-    required this.oanorIrrRemoteDataSource,
+    required this.iranIrrRemoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
   });
@@ -54,7 +55,7 @@ class RatesRepositoryImpl implements RatesRepository {
 
     if (await networkInfo.isConnected) {
       try {
-        // Ensure USD is present when we need a triangular Oanor IRR bridge.
+        // Ensure USD is present when we need a triangular Drive IRR bridge.
         final requestSymbols = _symbolsForIrrBridge(
           base: frankfurterBase,
           symbols: symbols,
@@ -63,6 +64,8 @@ class RatesRepositoryImpl implements RatesRepository {
           base: frankfurterBase,
           symbols: requestSymbols,
         );
+        // Drive feed is required for free-market IRR — do not fall back to
+        // Frankfurter’s official ~1.36M IRR (shows as ~136k IRT).
         var overlayed = await _overlayLatestIrr(remote);
         // Always derive IRT = IRR / 10 when a free-market IRR row exists.
         overlayed = attachTomanFromRial(overlayed);
@@ -74,7 +77,7 @@ class RatesRepositoryImpl implements RatesRepository {
         await localDataSource.cacheLatestRates(overlayed, now);
         return Right(overlayed.toDomain(fetchedAt: now));
       } on ServerException catch (e) {
-        // Soft-fail to cache when the network call fails.
+        // Soft-fail to a *previous* successful cache (may already include Drive).
         final cached = await _cachedSnapshot();
         if (cached != null) return Right(cached);
         return Left(ServerFailure(e.message));
@@ -86,20 +89,16 @@ class RatesRepositoryImpl implements RatesRepository {
     return const Left(NetworkFailure());
   }
 
-  /// Replaces Frankfurter IRR with free-market IRR (Oanor → TGJU cascade).
+  /// Replaces Frankfurter IRR with free-market IRR from the Drive USD feed.
   ///
-  /// Soft-fails only if **both** Iran-market sources fail — otherwise Home
-  /// would keep showing Frankfurter’s wrong ~1.37M official-style IRR.
+  /// Throws [ServerException] when the feed fails so we never stamp Frankfurter’s
+  /// official IRR as bazaar (that is what looked like ~136600 IRT on Home).
   Future<RateSnapshotModel> _overlayLatestIrr(RateSnapshotModel frankfurter) async {
-    try {
-      final foreignToIrr = await oanorIrrRemoteDataSource.getForeignToIrrRates();
-      return overlayIrrOnSnapshot(
-        frankfurter: frankfurter,
-        foreignToIrr: foreignToIrr,
-      );
-    } on ServerException {
-      return frankfurter;
-    }
+    final foreignToIrr = await iranIrrRemoteDataSource.getForeignToIrrRates();
+    return overlayIrrOnSnapshot(
+      frankfurter: frankfurter,
+      foreignToIrr: foreignToIrr,
+    );
   }
 
   /// Adds `USD` to [symbols] when the base is not USD/IRR/IRT and the caller
@@ -178,7 +177,7 @@ class RatesRepositoryImpl implements RatesRepository {
     }
   }
 
-  /// Prefers Oanor/TGJU history when either side is IRR/IRT; maps IRT ↔ IRR
+  /// Prefers Drive USD→IRR history when either side is IRR/IRT; maps IRT ↔ IRR
   /// with the fixed ×10 rule before/after the network call.
   Future<HistoricalSeriesModel> _historicalWithIrrOverlay({
     required String base,
@@ -217,40 +216,26 @@ class RatesRepositoryImpl implements RatesRepository {
     } else {
       final foreign =
           fetchBase == AppConstants.iranianRialCode ? fetchQuote : fetchBase;
-      final supported = AppConstants.oanorIrrForeignCodes.contains(foreign);
-      // Fall back to Frankfurter when Oanor does not list this foreign code.
-      if (!supported) {
+      try {
+        final foreignToIrr = await _foreignToIrrHistory(
+          foreign: foreign,
+          start: start,
+          end: end,
+        );
+        fetched = overlayIrrOnHistory(
+          foreignToIrrHistory: foreignToIrr,
+          base: fetchBase,
+          quote: fetchQuote,
+          invertToIrrBase: fetchBase == AppConstants.iranianRialCode,
+        );
+      } on ServerException {
+        // Soft-fail charts to Frankfurter if the Drive feed is unavailable.
         fetched = await remoteDataSource.getHistoricalSeries(
           base: fetchBase,
           quote: fetchQuote,
           start: start,
           end: end,
         );
-      } else {
-        try {
-          final daySpan = end.difference(start).inDays.abs() + 1;
-          final oanorHistory =
-              await oanorIrrRemoteDataSource.getForeignToIrrHistory(
-            foreignCode: foreign,
-            limit: daySpan,
-            start: start,
-            end: end,
-          );
-          fetched = overlayIrrOnHistory(
-            foreignToIrrHistory: oanorHistory,
-            base: fetchBase,
-            quote: fetchQuote,
-            invertToIrrBase: fetchBase == AppConstants.iranianRialCode,
-          );
-        } on ServerException {
-          // Soft-fail charts to Frankfurter if Oanor history is unavailable.
-          fetched = await remoteDataSource.getHistoricalSeries(
-            base: fetchBase,
-            quote: fetchQuote,
-            start: start,
-            end: end,
-          );
-        }
       }
     }
 
@@ -261,6 +246,71 @@ class RatesRepositoryImpl implements RatesRepository {
       fetchedBase: fetchBase,
       fetchedQuote: fetchQuote,
     );
+  }
+
+  /// Builds foreign→IRR history from Drive USD closes (+ Frankfurter cross).
+  ///
+  /// USD uses the feed directly. EUR/GBP/… = (foreign→USD) × (USD→IRR) per day.
+  Future<HistoricalSeriesModel> _foreignToIrrHistory({
+    required String foreign,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    final daySpan = end.difference(start).inDays.abs() + 1;
+    final usdIrr = await iranIrrRemoteDataSource.getForeignToIrrHistory(
+      foreignCode: 'USD',
+      limit: daySpan,
+      start: start,
+      end: end,
+    );
+
+    final upper = foreign.toUpperCase();
+    if (upper == 'USD') return usdIrr;
+
+    final foreignUsd = await remoteDataSource.getHistoricalSeries(
+      base: upper,
+      quote: 'USD',
+      start: start,
+      end: end,
+    );
+
+    final dated = <String, double>{};
+    final usdDates = usdIrr.datedRates.keys.toList()..sort();
+    for (final entry in foreignUsd.datedRates.entries) {
+      // Use the last known USD→IRR on or before this Frankfurter date.
+      final usdClose = _closeOnOrBefore(usdDates, usdIrr.datedRates, entry.key);
+      if (usdClose == null || usdClose <= 0 || entry.value <= 0) continue;
+      dated[entry.key] = entry.value * usdClose;
+    }
+
+    if (dated.isEmpty) {
+      throw const ServerException(
+        'Could not triangulate foreign→IRR history from Drive USD feed',
+      );
+    }
+
+    return HistoricalSeriesModel(
+      base: upper,
+      quote: 'IRR',
+      startDate: _fmt(start),
+      endDate: _fmt(end),
+      datedRates: dated,
+    );
+  }
+
+  /// Returns the rate for [date] or the nearest earlier day in [sortedDates].
+  double? _closeOnOrBefore(
+    List<String> sortedDates,
+    Map<String, double> rates,
+    String date,
+  ) {
+    if (rates.containsKey(date)) return rates[date];
+    String? previous;
+    for (final d in sortedDates) {
+      if (d.compareTo(date) > 0) break;
+      previous = d;
+    }
+    return previous == null ? null : rates[previous];
   }
 
   /// Builds a flat IRR↔IRT series using the fixed 10 Rial = 1 Toman rule.
