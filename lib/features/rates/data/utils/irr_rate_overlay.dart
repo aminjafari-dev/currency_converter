@@ -194,6 +194,44 @@ RateSnapshotModel rebaseSnapshotToIrt(RateSnapshotModel snapshot) {
   );
 }
 
+/// Multiplies every close so the newest point equals [latestClose].
+///
+/// Useful when Frankfurter provides the full chart window (1W / 6M / …) but
+/// we want the curve level to match the latest free-market Drive USD→IRR.
+///
+/// Example:
+/// ```dart
+/// // Official last close 1_370_000, bazaar 1_795_000 → whole series × ~1.31
+/// final aligned = alignHistoryToLatestClose(
+///   series: frankfurterUsdIrr,
+///   latestClose: 1795000,
+/// );
+/// ```
+HistoricalSeriesModel alignHistoryToLatestClose({
+  required HistoricalSeriesModel series,
+  required double latestClose,
+}) {
+  if (series.datedRates.isEmpty || latestClose <= 0) return series;
+
+  final dates = series.datedRates.keys.toList()..sort();
+  final last = series.datedRates[dates.last];
+  // Without a positive last close we cannot compute a scale factor.
+  if (last == null || last <= 0) return series;
+
+  final factor = latestClose / last;
+  if (factor == 1.0) return series;
+
+  return HistoricalSeriesModel(
+    base: series.base,
+    quote: series.quote,
+    startDate: series.startDate,
+    endDate: series.endDate,
+    datedRates: {
+      for (final entry in series.datedRates.entries) entry.key: entry.value * factor,
+    },
+  );
+}
+
 /// Scales an IRR-leg history into an IRT-leg history (÷ or × 10).
 ///
 /// Example: USD→IRR closes `/ 10` become USD→IRT closes.

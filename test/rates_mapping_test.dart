@@ -237,6 +237,32 @@ void main() {
       expect(scaled.datedRates['2026-07-01'], 178200);
       expect(scaled.datedRates['2026-07-02'], 179000);
     });
+
+    test('alignHistoryToLatestClose scales the whole curve to bazaar end', () {
+      // Given: official Frankfurter USD→IRR window ending at 1.37M
+      final series = HistoricalSeriesModel(
+        base: 'USD',
+        quote: 'IRR',
+        startDate: '2026-01-01',
+        endDate: '2026-07-02',
+        datedRates: const {
+          '2026-01-01': 1370000,
+          '2026-07-01': 1365000,
+          '2026-07-02': 1370000,
+        },
+      );
+
+      // When: align last close to free-market 1.795M
+      final aligned = alignHistoryToLatestClose(
+        series: series,
+        latestClose: 1795000,
+      );
+
+      // Then: shape kept, last point matches bazaar, earlier days scaled equally
+      expect(aligned.datedRates['2026-07-02'], closeTo(1795000, 0.01));
+      expect(aligned.datedRates['2026-07-01'], closeTo(1795000 * (1365000 / 1370000), 0.01));
+      expect(aligned.datedRates['2026-01-01'], closeTo(1795000, 0.01));
+    });
   });
 
   group('CurrencyStats', () {

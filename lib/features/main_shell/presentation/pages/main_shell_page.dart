@@ -42,8 +42,9 @@ class _MainShellPageState extends State<MainShellPage> {
     super.initState();
     // Own tab BLoCs at the shell so IndexedStack children share stable state.
     _homeBloc = locator<HomeBloc>()..add(const HomeEvent.started());
+    // Chart baseline is always USD; default quote is IRT (free-market Toman).
     _detailBloc = locator<DetailBloc>()
-      ..add(const DetailEvent.started(code: 'USD', baseCode: 'IRT'));
+      ..add(const DetailEvent.started(code: 'IRT', baseCode: 'USD'));
   }
 
   @override

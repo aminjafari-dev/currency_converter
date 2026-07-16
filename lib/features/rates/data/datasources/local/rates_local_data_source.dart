@@ -139,9 +139,17 @@ class RatesLocalDataSourceImpl implements RatesLocalDataSource {
   @override
   Future<List<SelectedCurrency>> getSelectedCurrencies() async {
     final codes = prefs.getStringList(AppConstants.selectedCurrenciesKey);
-    final base =
+    var base =
         prefs.getString(AppConstants.baseCurrencyKey) ??
             AppConstants.defaultBaseCurrency;
+
+    // Older builds stored IRT as the base row. App baseline is always USD
+    // (“1 USD = … IRT”), so migrate persisted IRT base → USD on read.
+    // Example: prefs base_currency=IRT → rewritten to USD, IRT stays a quote.
+    if (base.toUpperCase() == AppConstants.iranianTomanCode) {
+      base = AppConstants.defaultBaseCurrency;
+      await prefs.setString(AppConstants.baseCurrencyKey, base);
+    }
 
     final list = codes ?? AppConstants.defaultSelectedCurrencies;
     // Ensure the base code is present in the list.

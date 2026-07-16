@@ -2,7 +2,7 @@
 
 ## Description
 
-The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative reference rates from **Frankfurter** for global currencies, overlays **free-market Iranian Rial (IRR)** from a **public Google Drive JSON feed** (USD→IRR only; other pairs triangulated via USD), caches snapshots locally, persists the user's selected currency list, and hosts the Home (Currency List) presentation layer. Other features depend only on this feature's **domain** layer (entities + use cases), never on its data models.
+The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative reference rates from **Frankfurter** for global currencies, overlays **free-market Iranian Rial (IRR)** from a **public Google Drive JSON feed** (USD→IRR only; other pairs triangulated via USD), caches snapshots locally, persists the user's selected currency list, and hosts the Home (Currency List) presentation layer. **USD is the app baseline** (Home + Chart); synthetic IRT (Toman) is a quote only and cannot become the base row. Other features depend only on this feature's **domain** layer (entities + use cases), never on its data models.
 
 ## Architecture
 
@@ -63,7 +63,7 @@ The **rates** feature is the shared FX engine for Nerkhak. It fetches indicative
 - Template / local copy: `rates_feed/usd_irr_rates.json` (append `{ "at", "rate" }` rows when updating).
 - Other currencies vs IRR are triangulated: `(foreign→USD from Frankfurter) × (USD→IRR from Drive)`.
 - Synthetic **IRT** (Iranian Toman) is derived locally as `IRR / 10` (1 Toman = 10 Rial). No extra API.
-- Charts for pairs involving IRR/IRT use Drive USD history (and Frankfurter cross rates for non-USD legs).
+- Charts for pairs involving IRR/IRT follow the selected range chip (1W / 1M / 6M / …). Dense Drive history is preferred when it spans the window; otherwise Frankfurter daily history fills the range and is scaled to the latest Drive free-market USD→IRR level.
 
 ## Key Components
 

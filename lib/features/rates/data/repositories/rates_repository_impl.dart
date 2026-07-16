@@ -216,27 +216,15 @@ class RatesRepositoryImpl implements RatesRepository {
     } else {
       final foreign =
           fetchBase == AppConstants.iranianRialCode ? fetchQuote : fetchBase;
-      try {
-        final foreignToIrr = await _foreignToIrrHistory(
-          foreign: foreign,
-          start: start,
-          end: end,
-        );
-        fetched = overlayIrrOnHistory(
-          foreignToIrrHistory: foreignToIrr,
-          base: fetchBase,
-          quote: fetchQuote,
-          invertToIrrBase: fetchBase == AppConstants.iranianRialCode,
-        );
-      } on ServerException {
-        // Soft-fail charts to Frankfurter if the Drive feed is unavailable.
-        fetched = await remoteDataSource.getHistoricalSeries(
-          base: fetchBase,
-          quote: fetchQuote,
-          start: start,
-          end: end,
-        );
-      }
+      // Chart chips (1W / 6M / …) need daily points for the full window.
+      // A sparse Drive feed (e.g. only 2 days) must not freeze every range.
+      fetched = await _irrChartHistoryForRange(
+        foreign: foreign,
+        fetchBase: fetchBase,
+        fetchQuote: fetchQuote,
+        start: start,
+        end: end,
+      );
     }
 
     return scaleHistoryForToman(
@@ -246,6 +234,149 @@ class RatesRepositoryImpl implements RatesRepository {
       fetchedBase: fetchBase,
       fetchedQuote: fetchQuote,
     );
+  }
+
+  /// Builds an IRR-leg chart series for the selected [start]→[end] window.
+  ///
+  /// Prefers dense Drive bazaar history when it actually spans the range;
+  /// otherwise uses Frankfurter daily history (so 1W ≠ 6M) and lifts the
+  /// curve to the latest Drive free-market USD→IRR level when available.
+  ///
+  /// Example: user picks 6M with only 2 Drive samples → Frankfurter ~180 days,
+  /// scaled so the last close ≈ today’s bazaar rate.
+  Future<HistoricalSeriesModel> _irrChartHistoryForRange({
+    required String foreign,
+    required String fetchBase,
+    required String fetchQuote,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    // Dense Drive history → use bazaar closes as-is for the chart window.
+    try {
+      final drive = await _foreignToIrrHistory(
+        foreign: foreign,
+        start: start,
+        end: end,
+      );
+      if (_driveHistorySpansRange(drive.datedRates, start, end)) {
+        return overlayIrrOnHistory(
+          foreignToIrrHistory: drive,
+          base: fetchBase,
+          quote: fetchQuote,
+          invertToIrrBase: fetchBase == AppConstants.iranianRialCode,
+        );
+      }
+    } on ServerException {
+      // Fall through to Frankfurter full-range history.
+    }
+
+    // Sparse / missing Drive → Frankfurter covers the selected chip range.
+    var series = await remoteDataSource.getHistoricalSeries(
+      base: fetchBase,
+      quote: fetchQuote,
+      start: start,
+      end: end,
+    );
+
+    // Align official IRR level to the latest free-market USD→IRR when we can.
+    try {
+      final market = await iranIrrRemoteDataSource.getForeignToIrrRates();
+      final usdMarket = market['USD'];
+      if (usdMarket != null && usdMarket > 0) {
+        series = await _alignIrrSeriesToMarket(
+          series: series,
+          fetchBase: fetchBase,
+          fetchQuote: fetchQuote,
+          usdMarket: usdMarket,
+          start: start,
+          end: end,
+        );
+      }
+    } on ServerException {
+      // Keep official Frankfurter series — chart range still changes.
+    }
+
+    return series;
+  }
+
+  /// Returns true when Drive daily closes are dense enough for [start]→[end].
+  ///
+  /// Two fixed samples always fail — that is what made every chip look identical.
+  bool _driveHistorySpansRange(
+    Map<String, double> dated,
+    DateTime start,
+    DateTime end,
+  ) {
+    if (dated.length < 2) return false;
+
+    final daySpan = end.difference(start).inDays.abs() + 1;
+    // Short windows need several points; longer windows need ~1 point / 3 days.
+    final minPoints =
+        daySpan <= 10 ? 5 : (daySpan / 3).floor().clamp(8, 120);
+    if (dated.length < minPoints) return false;
+
+    final dates = dated.keys.toList()..sort();
+    final first = DateTime.tryParse(dates.first);
+    if (first == null) return false;
+
+    // First close must sit near the requested start (allow a week for weekends).
+    if (first.isAfter(start.add(const Duration(days: 7)))) return false;
+    return true;
+  }
+
+  /// Scales an official IRR-leg series so its level matches bazaar [usdMarket].
+  Future<HistoricalSeriesModel> _alignIrrSeriesToMarket({
+    required HistoricalSeriesModel series,
+    required String fetchBase,
+    required String fetchQuote,
+    required double usdMarket,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    // USD↔IRR: align the last close directly to the Drive bazaar rate.
+    if (fetchBase == 'USD' && fetchQuote == AppConstants.iranianRialCode) {
+      return alignHistoryToLatestClose(series: series, latestClose: usdMarket);
+    }
+    if (fetchBase == AppConstants.iranianRialCode && fetchQuote == 'USD') {
+      return alignHistoryToLatestClose(
+        series: series,
+        latestClose: 1.0 / usdMarket,
+      );
+    }
+
+    // Other legs: apply the same bazaar/official USD→IRR premium ratio.
+    // Example: EUR→IRR_official × (USD_bazaar / USD_official) ≈ EUR bazaar.
+    final usdOfficialSeries = await remoteDataSource.getHistoricalSeries(
+      base: 'USD',
+      quote: AppConstants.iranianRialCode,
+      start: start,
+      end: end,
+    );
+    final usdDates = usdOfficialSeries.datedRates.keys.toList()..sort();
+    if (usdDates.isEmpty || series.datedRates.isEmpty) return series;
+
+    final usdOfficialLast = usdOfficialSeries.datedRates[usdDates.last];
+    if (usdOfficialLast == null || usdOfficialLast <= 0) return series;
+
+    final premium = usdMarket / usdOfficialLast;
+    final seriesDates = series.datedRates.keys.toList()..sort();
+    final lastClose = series.datedRates[seriesDates.last];
+    if (lastClose == null || lastClose <= 0) return series;
+
+    if (fetchQuote == AppConstants.iranianRialCode) {
+      return alignHistoryToLatestClose(
+        series: series,
+        latestClose: lastClose * premium,
+      );
+    }
+    if (fetchBase == AppConstants.iranianRialCode) {
+      // Inverted pair: premium on IRR means the foreign quote shrinks.
+      return alignHistoryToLatestClose(
+        series: series,
+        latestClose: lastClose / premium,
+      );
+    }
+    return series;
   }
 
   /// Builds foreign→IRR history from Drive USD closes (+ Frankfurter cross).
@@ -451,7 +582,12 @@ class RatesRepositoryImpl implements RatesRepository {
   ) async {
     try {
       final current = await localDataSource.getSelectedCurrencies();
-      final upper = code.toUpperCase();
+      var upper = code.toUpperCase();
+      // IRT is a quote only — never make Toman the baseline row.
+      // Example: user taps IRT on Home → keep/set USD as base instead.
+      if (upper == AppConstants.iranianTomanCode) {
+        upper = AppConstants.defaultBaseCurrency;
+      }
       var list = current;
       // Ensure the new base is in the list.
       if (!list.any((c) => c.code == upper)) {

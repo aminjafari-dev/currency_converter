@@ -8,7 +8,10 @@ abstract final class AppConstants {
   static const String baseCurrencyKey = 'base_currency';
   static const String localeKey = 'app_locale';
   static const String themeModeKey = 'app_theme_mode';
-  static const String defaultBaseCurrency = 'IRT';
+  /// App baseline for Home + Chart: rates are always “1 USD = …”.
+  ///
+  /// Example: live row shows `1 USD = 179_500 IRT`, not `1 IRT = 0.000005 USD`.
+  static const String defaultBaseCurrency = 'USD';
 
   /// Public Google Drive direct-download URL for the USD→IRR JSON feed.
   ///
@@ -37,12 +40,11 @@ abstract final class AppConstants {
 
   /// Default selected list when the user has never customized.
   ///
-  /// First-launch line-up for the target audience (Iran):
-  /// Toman (synthetic IRT, also the base row), US Dollar, Euro,
-  /// Armenian Dram, Omani Rial, and UAE Dirham.
+  /// First-launch line-up: USD is the base row, then Toman (IRT) and
+  /// common regional quotes (Euro, Dram, Omani Rial, UAE Dirham).
   static const List<String> defaultSelectedCurrencies = [
-    'IRT',
     'USD',
+    'IRT',
     'EUR',
     'AMD',
     'OMR',
