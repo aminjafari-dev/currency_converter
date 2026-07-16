@@ -8,7 +8,7 @@ abstract final class AppConstants {
   static const String baseCurrencyKey = 'base_currency';
   static const String localeKey = 'app_locale';
   static const String themeModeKey = 'app_theme_mode';
-  static const String defaultBaseCurrency = 'USD';
+  static const String defaultBaseCurrency = 'IRT';
 
   /// Oanor Iran Rial Market API gateway (free-market / bazaar IRR only).
   static const String oanorBaseUrl = 'https://api.oanor.com/irr-api';
@@ -53,12 +53,17 @@ abstract final class AppConstants {
   static const int rialPerToman = 10;
 
   /// Default selected list when the user has never customized.
+  ///
+  /// First-launch line-up for the target audience (Iran):
+  /// Toman (synthetic IRT, also the base row), US Dollar, Euro,
+  /// Armenian Dram, Omani Rial, and UAE Dirham.
   static const List<String> defaultSelectedCurrencies = [
+    'IRT',
     'USD',
     'EUR',
-    'GBP',
-    'JPY',
-    'CAD',
+    'AMD',
+    'OMR',
+    'AED',
   ];
 
   /// Popular currencies shown at the top of Add Currency.

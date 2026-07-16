@@ -43,7 +43,7 @@ class _MainShellPageState extends State<MainShellPage> {
     // Own tab BLoCs at the shell so IndexedStack children share stable state.
     _homeBloc = locator<HomeBloc>()..add(const HomeEvent.started());
     _detailBloc = locator<DetailBloc>()
-      ..add(const DetailEvent.started(code: 'EUR', baseCode: 'USD'));
+      ..add(const DetailEvent.started(code: 'USD', baseCode: 'IRT'));
   }
 
   @override
